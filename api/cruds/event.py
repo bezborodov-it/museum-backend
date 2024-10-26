@@ -4,7 +4,13 @@ from typing import List
 from api.models.enums import FilterVisitorCategoryEnum, FilterEventGenreEnum
 from api.cruds.base import Base, with_model
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.models import EventORM, VisitorCategoryORM, EventGenreORM, LocationORM, event_visitor_category_association
+from api.models import (
+    EventORM,
+    VisitorCategoryORM,
+    EventGenreORM,
+    LocationORM,
+)
+from api.models.associations import event_visitor_category_association
 from api import schemas
 
 
@@ -13,7 +19,7 @@ class Event(Base):
 
     @classmethod
     async def update_image_url(
-            cls, session: AsyncSession, event_id: int, image_url: str
+        cls, session: AsyncSession, event_id: int, image_url: str
     ) -> EventORM:
         event = await cls.get_by_id(session, event_id)
         event.image_url = image_url
@@ -23,14 +29,14 @@ class Event(Base):
 
     @classmethod
     async def filter(
-            cls,
-            session: AsyncSession,
-            genre: List[int] = None,
-            location: List[int] = None,
-            visitor_category: List[int] = None,
-            disabilities: bool = None,
-            offset: int = 0,
-            limit: int = 10,
+        cls,
+        session: AsyncSession,
+        genre: List[int] = None,
+        location: List[int] = None,
+        visitor_category: List[int] = None,
+        disabilities: bool = None,
+        offset: int = 0,
+        limit: int = 10,
     ) -> List[schemas.EventBase]:
 
         query = select(EventORM)
@@ -43,7 +49,9 @@ class Event(Base):
 
         if visitor_category:
             query = query.join(event_visitor_category_association).filter(
-                event_visitor_category_association.c.visitor_category_id.in_(visitor_category)
+                event_visitor_category_association.c.visitor_category_id.in_(
+                    visitor_category
+                )
             )
 
         if disabilities is not None:
@@ -51,5 +59,4 @@ class Event(Base):
 
         query = query.offset(offset).limit(limit)
         result = await session.execute(query)
-        print(query)
         return result.scalars().all()

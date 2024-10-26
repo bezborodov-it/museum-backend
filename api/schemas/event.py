@@ -161,3 +161,16 @@ class EventUpdate(BaseModel):
     genre_id: Optional[int]
     visitor_category: Optional[List[int]] = []
     tag: Optional[List[int]] = []
+
+
+class PreferencesCreate(BaseModel):
+    genres: List[int]
+    tags: List[int]
+
+
+class PreferencesBase(BaseModel):
+    genres: List[EventTagBase]
+    tags: List[EventGenreBase]
+
+    class Config:
+        orm_mode = True

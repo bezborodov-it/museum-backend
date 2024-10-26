@@ -3,23 +3,11 @@ from sqlalchemy.orm import relationship
 
 from api.models.mixin.date import DateORMMixin
 from api.models.orms.base import BaseORM
-
-event_visitor_category_association = Table(
-    "event_visitor_category_association",
-    BaseORM.metadata,
-    Column("event_id", ForeignKey("event.id", ondelete="CASCADE"), primary_key=True),
-    Column(
-        "visitor_category_id",
-        ForeignKey("visitor_category.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-)
-
-event_tag_association = Table(
-    "event_tag_association",
-    BaseORM.metadata,
-    Column("event_id", ForeignKey("event.id", ondelete="CASCADE"), primary_key=True),
-    Column("tag_id", ForeignKey("event_tag.id", ondelete="CASCADE"), primary_key=True),
+from api.models.associations import (
+    user_genre_preference_association,
+    user_tag_preference_association,
+    event_visitor_category_association,
+    event_tag_association,
 )
 
 
@@ -89,6 +77,13 @@ class EventGenreORM(BaseORM):
         lazy="selectin",
     )
 
+    users = relationship(
+        "UserORM",
+        secondary=user_genre_preference_association,
+        back_populates="genres",
+        lazy="selectin",
+    )
+
     def __repr__(self) -> str:
         return f"<{self.__tablename__} {self.id} {self.name}>"
 
@@ -101,6 +96,13 @@ class EventTagORM(BaseORM):
         "EventORM",
         secondary=event_tag_association,
         back_populates="tag",
+        lazy="selectin",
+    )
+
+    users = relationship(
+        "UserORM",
+        secondary=user_tag_preference_association,
+        back_populates="tags",
         lazy="selectin",
     )
 

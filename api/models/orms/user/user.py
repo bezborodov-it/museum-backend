@@ -1,8 +1,12 @@
-from sqlalchemy import BigInteger, String, Column, Enum, ForeignKey
+from sqlalchemy import BigInteger, String, Column, Enum, ForeignKey, Table
 from sqlalchemy.orm import relationship
 
 from api.models.orms.base import BaseORM
 from api.models.mixin.date import DateORMMixin
+from api.models.associations import (
+    user_genre_preference_association,
+    user_tag_preference_association,
+)
 
 
 class UserORM(BaseORM, DateORMMixin):
@@ -25,7 +29,21 @@ class UserORM(BaseORM, DateORMMixin):
         lazy="selectin",
     )
 
+    genres = relationship(
+        "EventGenreORM",
+        secondary=user_genre_preference_association,
+        back_populates="users",
+        lazy="selectin",
+    )
+
+    tags = relationship(
+        "EventTagORM",
+        secondary=user_tag_preference_association,
+        back_populates="users",
+        lazy="selectin",
+    )
+
     tickets = relationship("TicketORM", back_populates="user", lazy="selectin")
 
     def __repr__(self) -> str:
-        return f"<{self.__tablename__} {self.user_id} {self.number}>"
+        return f"<{self.__tablename__} {self.name} {self.number}>"

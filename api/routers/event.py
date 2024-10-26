@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from api import schemas
-from api.cruds import Event, EventGenre, EventTag, EventVisitorCategory, Location
+from api.cruds import Event, EventGenre, EventTag, EventVisitorCategory, Location, User
 from api.configuration.database.db_helper import db_helper
 from api.dependencies import get_current_user, is_admin, get_image_with
 from api.models import UserORM
@@ -86,6 +86,18 @@ async def get_genre_list(
 
 
 @site_router.get(
+    "/tags",
+    response_model=List[schemas.EventTagBase],
+    status_code=200,
+    responses=response_codes,
+)
+async def get_tag_list(
+        session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    return await EventTag.get_all(session)
+
+
+@site_router.get(
     "/filter",
     status_code=200,
     response_model=List[schemas.EventBase],
@@ -99,9 +111,7 @@ async def get_genre_list(
 async def filter_event(
         genre: List[int] = Query(None, description="Жанр"),
         location: List[int] = Query(None, description="Локация"),
-        visitor_category: List[int] = Query(
-            None, description="Категория посетителей"
-        ),
+        visitor_category: List[int] = Query(None, description="Категория посетителей"),
         disabilities: bool = Query(None, description="Инклюзивность"),
         offset: int = Query(0, ge=0, description="Offset"),
         limit: int = Query(10, gt=0, le=100, description="Limit"),
@@ -119,8 +129,28 @@ async def filter_event(
     return events
 
 
+@site_router.post(
+    "/user/preferences",
+    response_model=schemas.PreferencesBase,
+    status_code=200,
+    responses=response_codes,
+)
+async def create_user_preferences(
+        payload: schemas.PreferencesCreate,
+        current_user: UserORM = Depends(get_current_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    user_preferences = await User.update(
+        session,
+        current_user.id,
+        payload.dict()
+    )
+
+    return user_preferences
+
+
 @site_router.put(
-    "",
+    "/{event_id}",
     response_model=schemas.EventBase,
     status_code=200,
     responses={

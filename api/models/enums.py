@@ -69,13 +69,13 @@ class TicketStatusEnum(str, Enum):
 
 
 class FilterEventGenreEnum(str, Enum):
-    excursion = 'excursion'
-    master_class = 'master_class'
-    spectacle = 'spectacle'
-    exhibition = 'exhibition'
-    interactive_lesson = 'interactive_lesson'
-    concert = 'concert'
-    genealogy = 'genealogy_event'
+    excursion = "excursion"
+    master_class = "master_class"
+    spectacle = "spectacle"
+    exhibition = "exhibition"
+    interactive_lesson = "interactive_lesson"
+    concert = "concert"
+    genealogy = "genealogy_event"
     lecture = "lecture"
     creative_meeting = "creative_meeting"
     festival = "festival"
