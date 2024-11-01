@@ -5,7 +5,6 @@ from .event import (
     EventTagORM,
     EventGenreORM,
     VisitorCategoryORM,
-    event_visitor_category_association
 )
 from .ticket import TicketORM
 from .location import LocationORM
@@ -21,5 +20,4 @@ __all__ = (
     "VisitorCategoryORM",
     "LocationORM",
     "TicketORM",
-    "event_visitor_category_association"
 )

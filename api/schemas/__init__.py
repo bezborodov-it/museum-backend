@@ -14,6 +14,8 @@ from .event import (
     EventTagCreate,
     EventTagUpdate,
     EventTagBase,
+    PreferencesCreate,
+    PreferencesBase
 )
 from .exhibit import ExhibitLogoCreate, ExhibitGet, ExhibitCreate, ExhibitUpdate
 from .email import EmailGet, EmailCreate
@@ -54,4 +56,6 @@ __all__ = (
     "EventTagUpdate",
     "EventTagBase",
     "ErrorBase",
+    "PreferencesCreate",
+    "PreferencesBase"
 )

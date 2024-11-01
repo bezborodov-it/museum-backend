@@ -16,20 +16,10 @@ class Base:
             key: value for key, value in data.items() if not isinstance(value, list)
         }
         obj = cls.model(**obj_data)
+
+        await cls._update_related_fields(session, obj, data)
+
         session.add(obj)
-        await session.commit()
-        await session.refresh(obj)
-
-        for field, related_ids in data.items():
-            if isinstance(related_ids, list):
-                related_model = getattr(cls.model, field).property.mapper.class_
-                related_objs = await session.execute(
-                    select(related_model).where(related_model.id.in_(related_ids))
-                )
-                related_objs = related_objs.scalars().all()
-
-                setattr(obj, field, related_objs)
-
         await session.commit()
         await session.refresh(obj)
 
@@ -51,16 +41,40 @@ class Base:
     ) -> BaseORM:
         obj = await cls.get_by_id(session, id_)
         for key, value in data.items():
-            setattr(obj, key, value)
+            if not isinstance(value, list):
+                setattr(obj, key, value)
+
+        await cls._update_related_fields(session, obj, data)
         await session.commit()
         await session.refresh(obj)
         return obj
+
+    @classmethod
+    async def _update_related_fields(
+        cls, session: AsyncSession, obj: BaseORM, data: Dict[str, Any]
+    ):
+        for field, related_ids in data.items():
+            if isinstance(related_ids, list):
+                related_model = getattr(cls.model, field).property.mapper.class_
+
+                related_objs = await session.execute(
+                    select(related_model).where(related_model.id.in_(related_ids))
+                )
+                related_objs = related_objs.scalars().all()
+
+                setattr(obj, field, related_objs)
 
     @classmethod
     async def delete(cls, session: AsyncSession, id_: int) -> None:
         obj = await cls.get_by_id(session, id_)
         await session.delete(obj)
         await session.commit()
+
+    @classmethod
+    async def get_all(cls, session: AsyncSession) -> list:
+        query = select(cls.model)
+        result = await session.execute(query)
+        return result.scalars().all()
 
 
 _BaseCRUDT = TypeVar("_BaseCRUDT", bound=Base)
