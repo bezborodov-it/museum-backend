@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from typing import List
 
 from api.models.enums import FilterVisitorCategoryEnum, FilterEventGenreEnum
@@ -9,6 +9,8 @@ from api.models import (
     VisitorCategoryORM,
     EventGenreORM,
     LocationORM,
+    UserORM,
+    EventTagORM
 )
 from api.models.associations import event_visitor_category_association
 from api import schemas
@@ -58,5 +60,30 @@ class Event(Base):
             query = query.filter(EventORM.disabilities == disabilities)
 
         query = query.offset(offset).limit(limit)
+        result = await session.execute(query)
+        return result.scalars().all()
+
+    @classmethod
+    async def get_events_by_user_tags(
+            cls,
+            session: AsyncSession,
+            current_user: UserORM
+    ) -> List[schemas.EventBase]:
+        user_tag_ids = [tag.id for tag in current_user.tags]
+        user_genre_ids = [genre.id for genre in current_user.genres]
+
+        query = (
+            select(EventORM)
+            .join(EventORM.tag, isouter=True)
+            .join(EventORM.genre, isouter=True)
+            .filter(
+                or_(
+                    EventTagORM.id.in_(user_tag_ids),
+                    EventGenreORM.id.in_(user_genre_ids)
+                )
+            )
+            .distinct()
+        )
+
         result = await session.execute(query)
         return result.scalars().all()

@@ -149,6 +149,24 @@ async def create_user_preferences(
     return user_preferences
 
 
+@site_router.get(
+    "/user/preferences",
+    response_model=List[schemas.EventBase],
+    status_code=200,
+    responses=response_codes,
+)
+async def get_user_preferences(
+        current_user: UserORM = Depends(get_current_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    user_preferences = await Event.get_events_by_user_tags(
+        session,
+        current_user
+    )
+
+    return user_preferences
+
+
 @site_router.put(
     "/{event_id}",
     response_model=schemas.EventBase,
