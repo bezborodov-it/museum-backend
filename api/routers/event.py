@@ -156,12 +156,16 @@ async def create_user_preferences(
     responses=response_codes,
 )
 async def get_user_preferences(
+        offset: int = Query(0, ge=0, description="Offset"),
+        limit: int = Query(10, gt=0, le=100, description="Limit"),
         current_user: UserORM = Depends(get_current_user),
         session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    user_preferences = await Event.get_events_by_user_tags(
+    user_preferences = await Event.get_events_by_user_preferences(
         session,
-        current_user
+        current_user,
+        offset,
+        limit
     )
 
     return user_preferences
