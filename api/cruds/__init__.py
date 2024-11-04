@@ -5,6 +5,7 @@ from .event_genre import EventGenre
 from .event_tag import EventTag
 from .location import Location
 from .visitor_category import EventVisitorCategory
+from .ticket import Ticket
 
 __all__ = (
     "User",
@@ -14,4 +15,5 @@ __all__ = (
     "EventTag",
     "Location",
     "EventVisitorCategory",
+    "Ticket",
 )

@@ -15,11 +15,12 @@ from .event import (
     EventTagUpdate,
     EventTagBase,
     PreferencesCreate,
-    PreferencesBase
+    PreferencesBase,
+    ShallowEvent,
 )
 from .exhibit import ExhibitLogoCreate, ExhibitGet, ExhibitCreate, ExhibitUpdate
 from .email import EmailGet, EmailCreate
-from .user import UserGet, BaseUser, UserUpdate
+from .user import UserGet, UserBase, UserUpdate
 from .auth import (
     PhoneNumberGet,
     VerificationCodeGet,
@@ -29,13 +30,14 @@ from .auth import (
     RefreshTokenResponse,
 )
 from .error import ErrorNotFound, ErrorGeneral
+from .ticket import TicketCreate, TicketBase
 
 __all__ = (
     "PhoneNumberGet",
     "VerificationCodeGet",
     "TokensResponse",
     "LoginRequestGet",
-    "BaseUser",
+    "UserBase",
     "AccessTokenResponse",
     "RefreshTokenGet",
     "RefreshTokenResponse",
@@ -57,5 +59,8 @@ __all__ = (
     "EventTagBase",
     "ErrorBase",
     "PreferencesCreate",
-    "PreferencesBase"
+    "PreferencesBase",
+    "TicketCreate",
+    "TicketBase",
+    "ShallowEvent",
 )

@@ -142,6 +142,17 @@ class EventBase(BaseModel):
         orm_mode = True
 
 
+class ShallowEvent(BaseModel):
+    id: int
+    name: str
+    image_url: Optional[str]
+    disabilities: bool
+    location: Optional[LocationBase]
+
+    class Config:
+        orm_mode = True
+
+
 class EventCreate(BaseModel):
     name: str
     description: str
