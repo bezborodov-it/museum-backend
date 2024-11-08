@@ -26,4 +26,5 @@ __all__ = (
     "EventGenreORM",
     "VisitorCategoryORM",
     "LocationORM",
+    "TicketORM",
 )

@@ -10,7 +10,7 @@ class UserGet(BaseModel):
         orm_mode = True
 
 
-class BaseUser(UserGet):
+class UserBase(UserGet):
     email: Optional[EmailStr]
     number: str
     name: Optional[str]

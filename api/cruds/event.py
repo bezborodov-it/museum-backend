@@ -1,4 +1,4 @@
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, func
 from typing import List
 
 from api.models.enums import FilterVisitorCategoryEnum, FilterEventGenreEnum
@@ -10,7 +10,7 @@ from api.models import (
     EventGenreORM,
     LocationORM,
     UserORM,
-    EventTagORM
+    EventTagORM,
 )
 from api.models.associations import event_visitor_category_association
 from api import schemas
@@ -21,7 +21,7 @@ class Event(Base):
 
     @classmethod
     async def update_image_url(
-        cls, session: AsyncSession, event_id: int, image_url: str
+            cls, session: AsyncSession, event_id: int, image_url: str
     ) -> EventORM:
         event = await cls.get_by_id(session, event_id)
         event.image_url = image_url
@@ -31,14 +31,14 @@ class Event(Base):
 
     @classmethod
     async def filter(
-        cls,
-        session: AsyncSession,
-        genre: List[int] = None,
-        location: List[int] = None,
-        visitor_category: List[int] = None,
-        disabilities: bool = None,
-        offset: int = 0,
-        limit: int = 10,
+            cls,
+            session: AsyncSession,
+            genre: List[int] = None,
+            location: List[int] = None,
+            visitor_category: List[int] = None,
+            disabilities: bool = None,
+            offset: int = 0,
+            limit: int = 10,
     ) -> List[schemas.EventBase]:
 
         query = select(EventORM)
@@ -59,15 +59,19 @@ class Event(Base):
         if disabilities is not None:
             query = query.filter(EventORM.disabilities == disabilities)
 
+        total_count = await session.scalar(select(func.count()).select_from(query.subquery()))
+
         query = query.offset(offset).limit(limit)
         result = await session.execute(query)
-        return result.scalars().all()
+        return result.scalars().all(), total_count
 
     @classmethod
-    async def get_events_by_user_tags(
+    async def get_events_by_user_preferences(
             cls,
             session: AsyncSession,
-            current_user: UserORM
+            current_user: UserORM,
+            offset: int = 0,
+            limit: int = 10,
     ) -> List[schemas.EventBase]:
         user_tag_ids = [tag.id for tag in current_user.tags]
         user_genre_ids = [genre.id for genre in current_user.genres]
@@ -79,11 +83,14 @@ class Event(Base):
             .filter(
                 or_(
                     EventTagORM.id.in_(user_tag_ids),
-                    EventGenreORM.id.in_(user_genre_ids)
+                    EventGenreORM.id.in_(user_genre_ids),
                 )
             )
             .distinct()
         )
 
+        total_count = await session.scalar(select(func.count()).select_from(query.subquery()))
+
+        query = query.offset(offset).limit(limit)
         result = await session.execute(query)
-        return result.scalars().all()
+        return result.scalars().all(), total_count

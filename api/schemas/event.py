@@ -142,6 +142,22 @@ class EventBase(BaseModel):
         orm_mode = True
 
 
+class ShallowEvent(BaseModel):
+    id: int
+    name: str
+    image_url: Optional[str]
+    disabilities: bool
+    location: Optional[LocationBase]
+
+    class Config:
+        orm_mode = True
+
+
+class EventFilterGet(BaseModel):
+    items: List[ShallowEvent]
+    total: int
+
+
 class EventCreate(BaseModel):
     name: str
     description: str
@@ -171,6 +187,17 @@ class PreferencesCreate(BaseModel):
 class PreferencesBase(BaseModel):
     genres: List[EventTagBase]
     tags: List[EventGenreBase]
+
+    class Config:
+        orm_mode = True
+
+
+class EventTicketGet(BaseModel):
+    id: int
+    name: str
+    image_url: Optional[str]
+    disabilities: bool
+    location: Optional[LocationBase]
 
     class Config:
         orm_mode = True
