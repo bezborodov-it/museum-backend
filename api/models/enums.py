@@ -87,3 +87,14 @@ class FilterVisitorCategoryEnum(str, Enum):
     kids = "kids"
     teenagers = "teenagers"
     adults = "adults"
+
+
+class FilterTicketStatusEnum(str, Enum):
+    booked = "booked"
+    sold = "purchased"
+
+
+class FilterTicketTypeEnum(str, Enum):
+    adult = "adult"
+    discount = "discount"
+    child = "child"

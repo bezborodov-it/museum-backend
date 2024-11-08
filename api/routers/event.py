@@ -106,9 +106,9 @@ async def get_tag_list(
 
 
 @site_router.get(
-    "/filter",
+    "/all",
     status_code=200,
-    response_model=List[schemas.ShallowEvent],
+    response_model=schemas.EventFilterGet,
     responses={
         201: {"description": "Success"},
         400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
@@ -116,7 +116,7 @@ async def get_tag_list(
         500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
     },
 )
-async def filter_event(
+async def get_events(
     genre: List[int] = Query(None, description="Жанр"),
     location: List[int] = Query(None, description="Локация"),
     visitor_category: List[int] = Query(None, description="Категория посетителей"),
@@ -125,7 +125,7 @@ async def filter_event(
     limit: int = Query(10, gt=0, le=100, description="Limit"),
     session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    events = await Event.filter(
+    events, total_count = await Event.filter(
         session,
         genre,
         location,
@@ -134,7 +134,10 @@ async def filter_event(
         offset,
         limit,
     )
-    return events
+    return {
+        "items": events,
+        "total": total_count,
+    }
 
 
 @site_router.post(
@@ -155,7 +158,7 @@ async def create_user_preferences(
 
 @site_router.get(
     "/user/preferences",
-    response_model=List[schemas.ShallowEvent],
+    response_model=schemas.EventFilterGet,
     status_code=200,
     responses=response_codes,
 )
@@ -165,11 +168,14 @@ async def get_user_preferences(
     current_user: UserORM = Depends(get_current_user),
     session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    user_preferences = await Event.get_events_by_user_preferences(
+    user_preferences, total_count = await Event.get_events_by_user_preferences(
         session, current_user, offset, limit
     )
 
-    return user_preferences
+    return {
+        "items": user_preferences,
+        "total": total_count,
+    }
 
 
 @site_router.put(

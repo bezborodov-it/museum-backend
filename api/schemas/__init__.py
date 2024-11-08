@@ -17,6 +17,8 @@ from .event import (
     PreferencesCreate,
     PreferencesBase,
     ShallowEvent,
+    EventFilterGet,
+    EventTicketGet
 )
 from .exhibit import ExhibitLogoCreate, ExhibitGet, ExhibitCreate, ExhibitUpdate
 from .email import EmailGet, EmailCreate
@@ -30,7 +32,7 @@ from .auth import (
     RefreshTokenResponse,
 )
 from .error import ErrorNotFound, ErrorGeneral
-from .ticket import TicketCreate, TicketBase
+from .ticket import TicketCreate, TicketBase, TicketFilterGet
 
 __all__ = (
     "PhoneNumberGet",
@@ -63,4 +65,7 @@ __all__ = (
     "TicketCreate",
     "TicketBase",
     "ShallowEvent",
+    "EventFilterGet",
+    "EventTicketGet",
+    "TicketFilterGet"
 )

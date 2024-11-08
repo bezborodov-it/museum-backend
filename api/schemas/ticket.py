@@ -1,16 +1,15 @@
 from typing import Optional, List
 from datetime import datetime
-from pydantic import validator, BaseModel
+from pydantic import validator, BaseModel, conint
 from enum import Enum
 
 from api.models.enums import TicketStatusEnum, TicketTypeEnum
-from api.schemas import EventBase, UserBase
+from api.schemas import EventBase, UserBase, EventTicketGet
 
 
 class TicketBase(BaseModel):
     id: int
-    event_id: int
-    customer_id: Optional[int]
+    event: EventTicketGet
     status: TicketStatusEnum
     type: TicketTypeEnum
     price: int
@@ -27,4 +26,9 @@ class TicketCreate(BaseModel):
     type: TicketTypeEnum
     price: int
     event_date: datetime
-    quantity: int
+    quantity: conint(ge=1, le=100)
+
+
+class TicketFilterGet(BaseModel):
+    items: List[TicketBase]
+    total: int
