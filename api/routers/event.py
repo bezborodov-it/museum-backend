@@ -49,9 +49,9 @@ response_codes = {
     },
 )
 async def create_event(
-    payload: schemas.EventCreate,
-    session: AsyncSession = Depends(db_helper.session_getter),
-    current_user: UserORM = Depends(is_admin),
+        payload: schemas.EventCreate,
+        session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(is_admin),
 ) -> Response:
     new_event = await Event.create(session, payload.dict())
     return new_event
@@ -64,7 +64,7 @@ async def create_event(
     responses=response_codes,
 )
 async def get_location_list(
-    session: AsyncSession = Depends(db_helper.session_getter),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     return await Location.get_all(session)
 
@@ -75,8 +75,8 @@ async def get_location_list(
     status_code=200,
     responses=response_codes,
 )
-async def get_visitor_categories_list(
-    session: AsyncSession = Depends(db_helper.session_getter),
+async def get_visitor_category_list(
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     return await EventVisitorCategory.get_all(session)
 
@@ -88,7 +88,7 @@ async def get_visitor_categories_list(
     responses=response_codes,
 )
 async def get_genre_list(
-    session: AsyncSession = Depends(db_helper.session_getter),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     return await EventGenre.get_all(session)
 
@@ -100,7 +100,7 @@ async def get_genre_list(
     responses=response_codes,
 )
 async def get_tag_list(
-    session: AsyncSession = Depends(db_helper.session_getter),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     return await EventTag.get_all(session)
 
@@ -117,13 +117,13 @@ async def get_tag_list(
     },
 )
 async def get_events(
-    genre: List[int] = Query(None, description="Жанр"),
-    location: List[int] = Query(None, description="Локация"),
-    visitor_category: List[int] = Query(None, description="Категория посетителей"),
-    disabilities: bool = Query(None, description="Инклюзивность"),
-    offset: int = Query(0, ge=0, description="Offset"),
-    limit: int = Query(10, gt=0, le=100, description="Limit"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        genre: List[int] = Query(None, description="Жанр"),
+        location: List[int] = Query(None, description="Локация"),
+        visitor_category: List[int] = Query(None, description="Категория посетителей"),
+        disabilities: bool = Query(None, description="Инклюзивность"),
+        offset: int = Query(0, ge=0, description="Offset"),
+        limit: int = Query(10, gt=0, le=100, description="Limit"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     events, total_count = await Event.filter(
         session,
@@ -147,9 +147,9 @@ async def get_events(
     responses=response_codes,
 )
 async def create_user_preferences(
-    payload: schemas.PreferencesCreate,
-    current_user: UserORM = Depends(get_current_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.PreferencesCreate,
+        current_user: UserORM = Depends(get_current_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     user_preferences = await User.update(session, current_user.id, payload.dict())
 
@@ -163,10 +163,10 @@ async def create_user_preferences(
     responses=response_codes,
 )
 async def get_user_preferences(
-    offset: int = Query(0, ge=0, description="Offset"),
-    limit: int = Query(10, gt=0, le=100, description="Limit"),
-    current_user: UserORM = Depends(get_current_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        offset: int = Query(0, ge=0, description="Offset"),
+        limit: int = Query(10, gt=0, le=100, description="Limit"),
+        current_user: UserORM = Depends(get_current_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     user_preferences, total_count = await Event.get_events_by_user_preferences(
         session, current_user, offset, limit
@@ -190,10 +190,10 @@ async def get_user_preferences(
     },
 )
 async def update_event_by_id(
-    pyload: schemas.EventUpdate,
-    event_id: PositiveInt = Path(..., description="The identifier of event"),
-    current_user: UserORM = Depends(is_admin),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        pyload: schemas.EventUpdate,
+        event_id: PositiveInt = Path(..., description="The identifier of event"),
+        current_user: UserORM = Depends(is_admin),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     updated_event = await Event.update(
         session, event_id, pyload.dict(exclude_unset=True)
@@ -212,11 +212,11 @@ async def update_event_by_id(
         500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
     },
 )
-async def upload_event_logo_by_id(
-    event_id: PositiveInt = Path(..., description="The identifier of event"),
-    file: UploadFile = Depends(get_image_with),
-    current_user: UserORM = Depends(is_admin),
-    session: AsyncSession = Depends(db_helper.session_getter),
+async def upload_logo_by_event_id(
+        event_id: PositiveInt = Path(..., description="The identifier of event"),
+        file: UploadFile = Depends(get_image_with),
+        current_user: UserORM = Depends(is_admin),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     image_url = save_event_image(file)
     updated_event = await Event.update_image_url(session, event_id, image_url)
@@ -230,25 +230,11 @@ async def upload_event_logo_by_id(
     responses=response_codes,
 )
 async def get_event_by_id(
-    session: AsyncSession = Depends(db_helper.session_getter),
-    event_id: PositiveInt = Path(..., description="The identifier of event"),
+        session: AsyncSession = Depends(db_helper.session_getter),
+        event_id: PositiveInt = Path(..., description="The identifier of event"),
 ) -> Response:
     event = await Event.get_by_id(session, event_id)
     return event
-
-
-@site_router.get(
-    "/{event_id}/tickets",
-    response_model=List[schemas.TicketBase],
-    status_code=200,
-    responses=response_codes,
-)
-async def get_avaliable_event_tickets(
-    session: AsyncSession = Depends(db_helper.session_getter),
-    event_id: PositiveInt = Path(..., description="The identifier of event"),
-) -> Response:
-    avaliable_tickets = await Ticket.get_avaliable(session, event_id)
-    return avaliable_tickets
 
 
 @site_router.post(
@@ -263,9 +249,9 @@ async def get_avaliable_event_tickets(
     },
 )
 async def create_location(
-    payload: schemas.LocationCreate,
-    current_user: UserORM = Depends(is_admin),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.LocationCreate,
+        current_user: UserORM = Depends(is_admin),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     new_location = await Location.create(session, payload.dict())
     return new_location
@@ -278,8 +264,8 @@ async def create_location(
     responses=response_codes,
 )
 async def get_location_by_id(
-    session: AsyncSession = Depends(db_helper.session_getter),
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
+        session: AsyncSession = Depends(db_helper.session_getter),
+        location_id: PositiveInt = Path(..., description="The identifier of location"),
 ) -> Response:
     location = await Location.get_by_id(session, location_id)
     return location
@@ -297,10 +283,10 @@ async def get_location_by_id(
     },
 )
 async def update_location_by_id(
-    payload: schemas.LocationUpdate,
-    session: AsyncSession = Depends(db_helper.session_getter),
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
-    current_user: UserORM = Depends(is_admin),
+        payload: schemas.LocationUpdate,
+        session: AsyncSession = Depends(db_helper.session_getter),
+        location_id: PositiveInt = Path(..., description="The identifier of location"),
+        current_user: UserORM = Depends(is_admin),
 ) -> Response:
     updated_location = await Location.update(
         session, location_id, payload.dict(exclude_unset=True)
@@ -315,10 +301,10 @@ async def update_location_by_id(
     responses=response_codes,
 )
 async def get_visitor_category_by_id(
-    session: AsyncSession = Depends(db_helper.session_getter),
-    visitor_category_id: PositiveInt = Path(
-        ..., description="The identifier of visitor category"
-    ),
+        session: AsyncSession = Depends(db_helper.session_getter),
+        visitor_category_id: PositiveInt = Path(
+            ..., description="The identifier of visitor category"
+        ),
 ) -> Response:
     visitor_category = await EventVisitorCategory.get_by_id(
         session, visitor_category_id
@@ -333,8 +319,8 @@ async def get_visitor_category_by_id(
     responses=response_codes,
 )
 async def get_event_genre_by_id(
-    session: AsyncSession = Depends(db_helper.session_getter),
-    genre_id: PositiveInt = Path(..., description="The identifier of genre"),
+        session: AsyncSession = Depends(db_helper.session_getter),
+        genre_id: PositiveInt = Path(..., description="The identifier of genre"),
 ) -> Response:
     genre = await EventGenre.get_by_id(session, genre_id)
     return genre
@@ -347,8 +333,8 @@ async def get_event_genre_by_id(
     responses=response_codes,
 )
 async def get_event_tag_by_id(
-    session: AsyncSession = Depends(db_helper.session_getter),
-    tag_id: PositiveInt = Path(..., description="The identifier of tag"),
+        session: AsyncSession = Depends(db_helper.session_getter),
+        tag_id: PositiveInt = Path(..., description="The identifier of tag"),
 ) -> Response:
     tag = await EventTag.get_by_id(session, tag_id)
     return tag

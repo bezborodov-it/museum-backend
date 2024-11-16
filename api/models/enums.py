@@ -66,6 +66,7 @@ class TicketStatusEnum(str, Enum):
     available = "Доступен"
     booked = "Забронирован"
     sold = "Продан"
+    transaction = "В процессе оплаты"
 
 
 class FilterEventGenreEnum(str, Enum):

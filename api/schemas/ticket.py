@@ -32,3 +32,22 @@ class TicketCreate(BaseModel):
 class TicketFilterGet(BaseModel):
     items: List[TicketBase]
     total: int
+
+
+class TicketPurchase(BaseModel):
+    url: str
+
+
+class PaymentCallback(BaseModel):
+    notification_type: str
+    operation_id: str
+    amount: float
+    withdraw_amount: float
+    currency: str
+    datetime: datetime
+    sender: str
+    codepro: bool
+    label: str
+    sha1_hash: str
+    unaccepted: bool
+

@@ -53,6 +53,11 @@ class Settings(BaseSettings):
     INSTANCE_ID: str = os.getenv("", "INSTANCE_ID")
     API_TOKEN: str = os.getenv("", "API_TOKEN")
     AUTH_MESSAGE_TEMPLATE: str = os.getenv("", "AUTH_MESSAGE_TEMPLATE")
+    # yoomoney
+    YOOMONEY_RECEIVER: str = os.getenv("", "YOOMONEY_RECEIVER")
+    YOOMONEY_QUIQPAY_FORM: str = os.getenv("", "YOOMONEY_QUIQPAY_FORM")
+    YOOMONEY_PAYMENT_TYPE: str = os.getenv("", "YOOMONEY_PAYMENT_TYPE")
+    YOOMONEY_NOTIFICATION_SECRET: str = os.getenv("", "YOOMONEY_NOTIFICATION_SECRET")
 
 
 class LocalSettings(Settings):
