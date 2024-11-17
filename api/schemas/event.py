@@ -148,6 +148,8 @@ class ShallowEvent(BaseModel):
     image_url: Optional[str]
     disabilities: bool
     location: Optional[LocationBase]
+    min_price: Optional[float] = None
+    nearest_date: Optional[datetime] = None
 
     class Config:
         orm_mode = True

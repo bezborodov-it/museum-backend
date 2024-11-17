@@ -14,9 +14,7 @@ from api.utils.auth import (
     create_refresh_token,
 )
 from api.service.redis import redis_service
-from api.bot.whatsapp import whatsapp_bot
-from api.dependencies import get_current_user
-from api.models import UserORM
+from api.service.whatsapp import whatsapp_bot
 
 site_router = APIRouter(prefix="/auth", tags=["auth"])
 

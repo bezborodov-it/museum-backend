@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from api.cruds.base import ModelNotFoundError
 from api.dependencies.image import ImageUploadError
-from api.exceptions.base import TicketNotAvailableError
+from api.exceptions.base import TicketNotAvailableError, InvalidPaymentHashError
 
 
 def init_exception_handlers(app: FastAPI):
@@ -29,6 +29,17 @@ def init_exception_handlers(app: FastAPI):
     @app.exception_handler(TicketNotAvailableError)
     async def ticket_not_available_handler(
         request: Request, exc: TicketNotAvailableError
+    ):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "detail": exc.message,
+            },
+        )
+
+    @app.exception_handler(InvalidPaymentHashError)
+    async def invalid_payment_hash_handler(
+            request: Request, exc: InvalidPaymentHashError
     ):
         return JSONResponse(
             status_code=400,

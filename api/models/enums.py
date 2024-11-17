@@ -65,7 +65,8 @@ class UserRoleEnum(str, Enum):
 class TicketStatusEnum(str, Enum):
     available = "Доступен"
     booked = "Забронирован"
-    sold = "Продан"
+    sold = "Приобретен"
+    transaction = "В процессе оплаты"
 
 
 class FilterEventGenreEnum(str, Enum):
@@ -91,7 +92,8 @@ class FilterVisitorCategoryEnum(str, Enum):
 
 class FilterTicketStatusEnum(str, Enum):
     booked = "booked"
-    sold = "purchased"
+    sold = "sold"
+    transaction = "transaction"
 
 
 class FilterTicketTypeEnum(str, Enum):

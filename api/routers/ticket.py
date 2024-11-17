@@ -59,6 +59,25 @@ async def book_ticket(
     return booked_ticket
 
 
+@site_router.post("/purchase/{ticket_id}", response_model=schemas.TicketPurchase)
+async def purchase_ticket(
+        ticket_id: PositiveInt,
+        session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(get_current_user),
+) -> Response:
+    url = await Ticket.create_purchase_url(session, ticket_id, current_user.id)
+    return schemas.TicketPurchase(url=url)
+
+
+@site_router.post("/payment/callback", response_model=schemas.TicketBase)
+async def payment_callback(
+        payload: schemas.PaymentCallback,
+        session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    sold_ticket = await Ticket.update_after_success_purchase(session, payload.dict())
+    return sold_ticket
+
+
 @site_router.get(
     "/{ticket_id}",
     response_model=schemas.TicketBase,
@@ -72,3 +91,17 @@ async def get_ticket_by_id(
 ) -> Response:
     ticket = await Ticket.get_by_id(session, ticket_id)
     return ticket
+
+
+@site_router.get(
+    "/avaliable/{event_id}",
+    response_model=List[schemas.ShallowTicket],
+    status_code=200,
+    responses=response_codes,
+)
+async def get_avaliable_tickets_by_event_id(
+        session: AsyncSession = Depends(db_helper.session_getter),
+        event_id: PositiveInt = Path(..., description="The identifier of event"),
+) -> Response:
+    avaliable_tickets = await Ticket.get_avaliable(session, event_id)
+    return avaliable_tickets
