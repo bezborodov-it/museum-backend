@@ -11,6 +11,7 @@ from api.models import (
     LocationORM,
     UserORM,
     EventTagORM,
+    TicketORM
 )
 from api.models.associations import event_visitor_category_association
 from api import schemas
@@ -40,8 +41,11 @@ class Event(Base):
             offset: int = 0,
             limit: int = 10,
     ) -> List[schemas.EventBase]:
-
-        query = select(EventORM)
+        query = select(
+            EventORM,
+            func.min(TicketORM.price).label("min_price"),
+            func.min(TicketORM.event_date).label("nearest_date")
+        ).join(TicketORM, TicketORM.event_id == EventORM.id, isouter=True)
 
         if genre:
             query = query.filter(EventORM.genre_id.in_(genre))
@@ -59,11 +63,23 @@ class Event(Base):
         if disabilities is not None:
             query = query.filter(EventORM.disabilities == disabilities)
 
-        total_count = await session.scalar(select(func.count()).select_from(query.subquery()))
+        query = query.group_by(EventORM.id)
+        query = query.order_by(func.min(TicketORM.event_date))
 
+        total_count = await session.scalar(select(func.count()).select_from(query.subquery()))
         query = query.offset(offset).limit(limit)
         result = await session.execute(query)
-        return result.scalars().all(), total_count
+
+        events = [
+            {
+                **event[0].__dict__,
+                "min_price": event[1],
+                "nearest_date": event[2]
+            }
+            for event in result.fetchall()
+        ]
+
+        return events, total_count
 
     @classmethod
     async def get_events_by_user_preferences(
