@@ -51,3 +51,12 @@ class PaymentCallback(BaseModel):
     sha1_hash: str
     unaccepted: bool
 
+
+class ShallowTicket(BaseModel):
+    id: int
+    type: TicketTypeEnum
+    price: int
+    event_date: datetime
+
+    class Config:
+        orm_mode = True

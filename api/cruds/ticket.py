@@ -68,6 +68,9 @@ class Ticket(Base):
         if ticket.status == TicketStatusEnum.sold or ticket.status == TicketStatusEnum.transaction:
             raise TicketNotAvailableError("Ticket is not available for purchase.")
 
+        if ticket.customer_id is not None and ticket.customer_id != user_id:
+            raise TicketNotAvailableError("Ticket is not available for purchase. It's booked by another user")
+
         purchase_url, label = yoomoney.create_payment_url(
             amount=ticket.price,
         )

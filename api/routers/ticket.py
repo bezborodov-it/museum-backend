@@ -95,7 +95,7 @@ async def get_ticket_by_id(
 
 @site_router.get(
     "/avaliable/{event_id}",
-    response_model=List[schemas.TicketBase],
+    response_model=List[schemas.ShallowTicket],
     status_code=200,
     responses=response_codes,
 )
