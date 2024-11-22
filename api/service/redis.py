@@ -13,17 +13,5 @@ class RedisService:
             decode_responses=True,
         )
 
-    async def set_code(self, phone_number: str, code: str, expire: int = 600) -> None:
-        """Сохранение кода в Redis с истечением срока действия (expire в секундах)"""
-        await self.redis.setex(phone_number, expire, code)
-
-    async def get_code(self, phone_number: str) -> str:
-        """Получение кода из Redis"""
-        return await self.redis.get(phone_number)
-
-    async def delete_code(self, phone_number: str) -> None:
-        """Удаление кода из Redis"""
-        await self.redis.delete(phone_number)
-
 
 redis_service = RedisService()

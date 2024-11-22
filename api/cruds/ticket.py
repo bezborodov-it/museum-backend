@@ -2,7 +2,9 @@ from datetime import datetime
 
 from sqlalchemy import select, or_
 from typing import List, Dict, Any
+from datetime import timezone
 
+from api import schemas
 from api.models.enums import FilterVisitorCategoryEnum, FilterEventGenreEnum
 from api.cruds.base import Base, with_model
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +12,7 @@ from api.models import TicketORM
 from api.models.enums import TicketStatusEnum
 from api.exceptions.base import TicketNotAvailableError
 from api.service.yoomoney import yoomoney
+from api.utils.qr_code import generate_qr_code_base64
 
 
 @with_model(TicketORM)
@@ -63,7 +66,7 @@ class Ticket(Base):
             session: AsyncSession,
             ticket_id: int,
             user_id: int,
-    ) -> str:
+    ) -> schemas.TicketPurchase:
         ticket = await cls.get_by_id(session, ticket_id)
         if ticket.status == TicketStatusEnum.sold or ticket.status == TicketStatusEnum.transaction:
             raise TicketNotAvailableError("Ticket is not available for purchase.")
@@ -107,8 +110,14 @@ class Ticket(Base):
             if ticket.status == TicketStatusEnum.sold:
                 raise TicketNotAvailableError("Ticket is already sold.")
 
+            qr_data = f"TicketID:{ticket.id}|Event:{ticket.event.name}|Date:{ticket.event_date}|Price:{ticket.price}"
+            qr_code = generate_qr_code_base64(qr_data)
+
+            datetime_without_tz = data["datetime"].astimezone(timezone.utc).replace(tzinfo=None)
+
             await Ticket.update(session, ticket.id, {
                 "status": TicketStatusEnum.sold,
-                "purchased_at": data["datetime"],
+                "purchased_at": datetime_without_tz,
+                "qr_code": qr_code
             })
             return ticket

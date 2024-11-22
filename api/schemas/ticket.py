@@ -16,6 +16,7 @@ class TicketBase(BaseModel):
     booked_at: Optional[datetime]
     purchased_at: Optional[datetime]
     event_date: datetime
+    qr_code: Optional[str]
 
     class Config:
         orm_mode = True

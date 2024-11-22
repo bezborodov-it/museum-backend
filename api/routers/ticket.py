@@ -19,6 +19,7 @@ from api.dependencies import get_current_user, is_admin, get_image_with
 from api.models import UserORM
 from api.models.enums import FilterEventGenreEnum, FilterVisitorCategoryEnum
 from api.utils.image import save_event_image
+from api.service.redis import redis_service
 
 site_router = APIRouter(prefix="/ticket", tags=["ticket"])
 
@@ -66,7 +67,19 @@ async def purchase_ticket(
         current_user: UserORM = Depends(get_current_user),
 ) -> Response:
     url = await Ticket.create_purchase_url(session, ticket_id, current_user.id)
+    await redis_service.redis.set(ticket_id, url, ex=900)
     return schemas.TicketPurchase(url=url)
+
+
+@site_router.post("/purchase/{ticket_id}/url", response_model=schemas.TicketPurchase)
+async def get_temporary_purchase_url(
+        ticket_id: PositiveInt,
+        current_user: UserORM = Depends(get_current_user),
+) -> Response:
+    stored_url = await redis_service.redis.get(ticket_id)
+    if stored_url is None:
+        raise HTTPException(status_code=400, detail="Payment ticket time is expired")
+    return schemas.TicketPurchase(url=stored_url)
 
 
 @site_router.post("/payment/callback", response_model=schemas.TicketBase)
