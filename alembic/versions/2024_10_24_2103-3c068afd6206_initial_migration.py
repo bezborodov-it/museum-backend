@@ -166,7 +166,9 @@ def upgrade() -> None:
         sa.Column("customer_id", sa.BigInteger(), nullable=True),
         sa.Column(
             "status",
-            sa.Enum("available", "booked", "sold", "transaction", name="ticketstatusenum"),
+            sa.Enum(
+                "available", "booked", "sold", "transaction", name="ticketstatusenum"
+            ),
             nullable=True,
         ),
         sa.Column(

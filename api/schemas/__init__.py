@@ -31,7 +31,14 @@ from .auth import (
     RefreshTokenResponse,
 )
 from .error import ErrorNotFound, ErrorGeneral
-from .ticket import TicketCreate, TicketBase, TicketFilterGet, TicketPurchase, PaymentCallback,     ShallowTicket
+from .ticket import (
+    TicketCreate,
+    TicketBase,
+    TicketFilterGet,
+    TicketPurchase,
+    PaymentCallback,
+    ShallowTicket,
+)
 
 
 __all__ = (
@@ -70,5 +77,5 @@ __all__ = (
     "TicketFilterGet",
     "TicketPurchase",
     "PaymentCallback",
-    "ShallowTicket"
+    "ShallowTicket",
 )

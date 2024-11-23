@@ -9,7 +9,7 @@ def generate_qr_code_base64(data: str) -> str:
     qr.add_data(data)
     qr.make(fit=True)
 
-    img = qr.make_image(fill='black', back_color='white')
+    img = qr.make_image(fill="black", back_color="white")
 
     buffered = BytesIO()
     img.save(buffered, format="PNG")

@@ -11,10 +11,9 @@ from api.models import (
     LocationORM,
     UserORM,
     EventTagORM,
-    TicketORM
+    TicketORM,
 )
 from api.models.associations import event_visitor_category_association
-from api import schemas
 
 
 @with_model(EventORM)
@@ -22,7 +21,7 @@ class Event(Base):
 
     @classmethod
     async def update_image_url(
-            cls, session: AsyncSession, event_id: int, image_url: str
+        cls, session: AsyncSession, event_id: int, image_url: str
     ) -> EventORM:
         event = await cls.get_by_id(session, event_id)
         event.image_url = image_url
@@ -32,19 +31,19 @@ class Event(Base):
 
     @classmethod
     async def filter(
-            cls,
-            session: AsyncSession,
-            genre: List[int] = None,
-            location: List[int] = None,
-            visitor_category: List[int] = None,
-            disabilities: bool = None,
-            offset: int = 0,
-            limit: int = 10,
-    ) -> List[schemas.EventBase]:
+        cls,
+        session: AsyncSession,
+        genre: List[int] = None,
+        location: List[int] = None,
+        visitor_category: List[int] = None,
+        disabilities: bool = None,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> List[EventORM]:
         query = select(
             EventORM,
             func.min(TicketORM.price).label("min_price"),
-            func.min(TicketORM.event_date).label("nearest_date")
+            func.min(TicketORM.event_date).label("nearest_date"),
         ).join(TicketORM, TicketORM.event_id == EventORM.id, isouter=True)
 
         if genre:
@@ -66,16 +65,14 @@ class Event(Base):
         query = query.group_by(EventORM.id)
         query = query.order_by(func.min(TicketORM.event_date))
 
-        total_count = await session.scalar(select(func.count()).select_from(query.subquery()))
+        total_count = await session.scalar(
+            select(func.count()).select_from(query.subquery())
+        )
         query = query.offset(offset).limit(limit)
         result = await session.execute(query)
 
         events = [
-            {
-                **event[0].__dict__,
-                "min_price": event[1],
-                "nearest_date": event[2]
-            }
+            {**event[0].__dict__, "min_price": event[1], "nearest_date": event[2]}
             for event in result.fetchall()
         ]
 
@@ -83,12 +80,12 @@ class Event(Base):
 
     @classmethod
     async def get_events_by_user_preferences(
-            cls,
-            session: AsyncSession,
-            current_user: UserORM,
-            offset: int = 0,
-            limit: int = 10,
-    ) -> List[schemas.EventBase]:
+        cls,
+        session: AsyncSession,
+        current_user: UserORM,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> List[EventORM]:
         user_tag_ids = [tag.id for tag in current_user.tags]
         user_genre_ids = [genre.id for genre in current_user.genres]
 
@@ -105,7 +102,9 @@ class Event(Base):
             .distinct()
         )
 
-        total_count = await session.scalar(select(func.count()).select_from(query.subquery()))
+        total_count = await session.scalar(
+            select(func.count()).select_from(query.subquery())
+        )
 
         query = query.offset(offset).limit(limit)
         result = await session.execute(query)

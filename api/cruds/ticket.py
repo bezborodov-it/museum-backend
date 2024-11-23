@@ -20,7 +20,7 @@ class Ticket(Base):
 
     @classmethod
     async def create_bulk(
-            cls, session: AsyncSession, data: Dict[str, Any]
+        cls, session: AsyncSession, data: Dict[str, Any]
     ) -> List[TicketORM]:
         quantity = data.pop("quantity", 1)
         tickets = []
@@ -34,7 +34,7 @@ class Ticket(Base):
 
     @classmethod
     async def book(
-            cls, session: AsyncSession, ticket_id: int, user_id: int
+        cls, session: AsyncSession, ticket_id: int, user_id: int
     ) -> List[TicketORM]:
         ticket = await cls.get_by_id(session, ticket_id)
 
@@ -51,7 +51,7 @@ class Ticket(Base):
 
     @classmethod
     async def get_avaliable(
-            cls, session: AsyncSession, event_id: int
+        cls, session: AsyncSession, event_id: int
     ) -> List[TicketORM]:
         query = select(TicketORM).filter(
             TicketORM.event_id == event_id,
@@ -62,17 +62,22 @@ class Ticket(Base):
 
     @classmethod
     async def create_purchase_url(
-            cls,
-            session: AsyncSession,
-            ticket_id: int,
-            user_id: int,
+        cls,
+        session: AsyncSession,
+        ticket_id: int,
+        user_id: int,
     ) -> schemas.TicketPurchase:
         ticket = await cls.get_by_id(session, ticket_id)
-        if ticket.status == TicketStatusEnum.sold or ticket.status == TicketStatusEnum.transaction:
+        if (
+            ticket.status == TicketStatusEnum.sold
+            or ticket.status == TicketStatusEnum.transaction
+        ):
             raise TicketNotAvailableError("Ticket is not available for purchase.")
 
         if ticket.customer_id is not None and ticket.customer_id != user_id:
-            raise TicketNotAvailableError("Ticket is not available for purchase. It's booked by another user")
+            raise TicketNotAvailableError(
+                "Ticket is not available for purchase. It's booked by another user"
+            )
 
         purchase_url, label = yoomoney.create_payment_url(
             amount=ticket.price,
@@ -84,23 +89,23 @@ class Ticket(Base):
             {
                 "customer_id": user_id,
                 "status": TicketStatusEnum.transaction,
-                "transaction_label": label
-            }
+                "transaction_label": label,
+            },
         )
 
         return purchase_url
 
     @classmethod
-    async def get_by_transaction_label(cls, session: AsyncSession, label: str) -> TicketORM:
+    async def get_by_transaction_label(
+        cls, session: AsyncSession, label: str
+    ) -> TicketORM:
         query = select(TicketORM).where(TicketORM.transaction_label == label)
         result = await session.execute(query)
         return result.scalars().first()
 
     @classmethod
     async def update_after_success_purchase(
-            cls,
-            session: AsyncSession,
-            data: Dict
+        cls, session: AsyncSession, data: Dict
     ) -> TicketORM:
         valid_hash = yoomoney.verify_payment(data)
         if valid_hash:
@@ -113,11 +118,17 @@ class Ticket(Base):
             qr_data = f"TicketID:{ticket.id}|Event:{ticket.event.id}|Date:{ticket.event_date}|Price:{ticket.price}"
             qr_code = generate_qr_code_base64(qr_data)
 
-            datetime_without_tz = data["datetime"].astimezone(timezone.utc).replace(tzinfo=None)
+            datetime_without_tz = (
+                data["datetime"].astimezone(timezone.utc).replace(tzinfo=None)
+            )
 
-            await Ticket.update(session, ticket.id, {
-                "status": TicketStatusEnum.sold,
-                "purchased_at": datetime_without_tz,
-                "qr_code": qr_code
-            })
+            await Ticket.update(
+                session,
+                ticket.id,
+                {
+                    "status": TicketStatusEnum.sold,
+                    "purchased_at": datetime_without_tz,
+                    "qr_code": qr_code,
+                },
+            )
             return ticket

@@ -8,7 +8,7 @@ from api.models import RefreshTokenORM
 @with_model(RefreshTokenORM)
 class RefreshToken(Base):
     @classmethod
-    async def get_by_token(cls, session: AsyncSession, refresh_token: str):
+    async def get_by_token(cls, session: AsyncSession, refresh_token: str) -> str:
         query = select(RefreshTokenORM).where(RefreshTokenORM.token == refresh_token)
         result = await session.execute(query)
         return result.scalars().first()

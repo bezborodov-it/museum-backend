@@ -39,7 +39,7 @@ def init_exception_handlers(app: FastAPI):
 
     @app.exception_handler(InvalidPaymentHashError)
     async def invalid_payment_hash_handler(
-            request: Request, exc: InvalidPaymentHashError
+        request: Request, exc: InvalidPaymentHashError
     ):
         return JSONResponse(
             status_code=400,
