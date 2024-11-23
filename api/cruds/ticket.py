@@ -110,7 +110,7 @@ class Ticket(Base):
             if ticket.status == TicketStatusEnum.sold:
                 raise TicketNotAvailableError("Ticket is already sold.")
 
-            qr_data = f"TicketID:{ticket.id}|Event:{ticket.event.name}|Date:{ticket.event_date}|Price:{ticket.price}"
+            qr_data = f"TicketID:{ticket.id}|Event:{ticket.event.id}|Date:{ticket.event_date}|Price:{ticket.price}"
             qr_code = generate_qr_code_base64(qr_data)
 
             datetime_without_tz = data["datetime"].astimezone(timezone.utc).replace(tzinfo=None)

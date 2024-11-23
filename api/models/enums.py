@@ -64,7 +64,7 @@ class UserRoleEnum(str, Enum):
 
 class TicketStatusEnum(str, Enum):
     available = "Доступен"
-    booked = "Забронирован"
+    booked = "Бронь"
     sold = "Куплен"
     transaction = "В процессе оплаты"
 
