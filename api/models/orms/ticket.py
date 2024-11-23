@@ -27,6 +27,7 @@ class TicketORM(BaseORM, DateORMMixin):
     purchased_at = Column(DateTime, nullable=True)
     event_date = Column(DateTime, nullable=False)
     transaction_label = Column(String, nullable=True)
+    qr_code = Column(String, nullable=True)
 
     event = relationship("EventORM", back_populates="tickets", lazy="selectin")
     user = relationship(

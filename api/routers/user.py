@@ -29,7 +29,7 @@ response_codes = {
     },
 )
 async def get_current_user(
-        current_user: UserORM = Depends(get_current_user),
+    current_user: UserORM = Depends(get_current_user),
 ) -> Response:
     return current_user
 
@@ -41,9 +41,9 @@ async def get_current_user(
     responses=response_codes,
 )
 async def update_current_user(
-        pyload: schemas.UserUpdate,
-        current_user: UserORM = Depends(get_current_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+    pyload: schemas.UserUpdate,
+    current_user: UserORM = Depends(get_current_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     user_data = pyload.dict(exclude_unset=True)
     updated_user = await User.update(session, current_user.id, user_data)
@@ -58,20 +58,17 @@ async def update_current_user(
     responses=response_codes,
 )
 async def get_user_tickets(
-        ticket_status: List[FilterTicketStatusEnum] = Query(None, description="Статус билета"),
-        ticket_type: List[FilterTicketTypeEnum] = Query(None, description="Тип билета"),
-        offset: int = Query(0, ge=0, description="Offset"),
-        limit: int = Query(10, gt=0, le=100, description="Limit"),
-        current_user: UserORM = Depends(get_current_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+    ticket_status: List[FilterTicketStatusEnum] = Query(
+        None, description="Статус билета"
+    ),
+    ticket_type: List[FilterTicketTypeEnum] = Query(None, description="Тип билета"),
+    offset: int = Query(0, ge=0, description="Offset"),
+    limit: int = Query(10, gt=0, le=100, description="Limit"),
+    current_user: UserORM = Depends(get_current_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     user_tickets, total_count = await User.filter_tickets(
-        session,
-        current_user.id,
-        ticket_status,
-        ticket_type,
-        offset,
-        limit
+        session, current_user.id, ticket_status, ticket_type, offset, limit
     )
     return {
         "items": user_tickets,

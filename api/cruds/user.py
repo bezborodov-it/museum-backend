@@ -29,13 +29,13 @@ class User(Base):
 
     @classmethod
     async def filter_tickets(
-            cls,
-            session: AsyncSession,
-            user_id: int,
-            ticket_status: List[FilterTicketStatusEnum] = None,
-            ticket_type: List[FilterTicketTypeEnum] = None,
-            offset: int = 0,
-            limit: int = 10,
+        cls,
+        session: AsyncSession,
+        user_id: int,
+        ticket_status: List[FilterTicketStatusEnum] = None,
+        ticket_type: List[FilterTicketTypeEnum] = None,
+        offset: int = 0,
+        limit: int = 10,
     ) -> List[TicketORM]:
         query = select(TicketORM).where(TicketORM.customer_id == user_id)
 
@@ -45,7 +45,9 @@ class User(Base):
         if ticket_type:
             query = query.where(TicketORM.type.in_(ticket_type))
 
-        total_count = await session.scalar(select(func.count()).select_from(query.subquery()))
+        total_count = await session.scalar(
+            select(func.count()).select_from(query.subquery())
+        )
 
         query = query.offset(offset).limit(limit)
         result = await session.execute(query)
