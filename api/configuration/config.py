@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
-from pydantic import BaseSettings, AnyHttpUrl
+from pydantic import AnyHttpUrl
+from pydantic_settings import BaseSettings
 from typing import List
 
 load_dotenv()
@@ -10,9 +11,9 @@ class Settings(BaseSettings):
     # base
     WORKERS: int = 1
     VERSION: str = os.getenv("1.0.0", "VERSION")
-    HOST = "localhost"
+    HOST: str = "localhost"
     PREFIX: str = "/api"
-    PORT: int = 8000
+    PORT: int = 8080
     RELOAD: bool = False
     CORS_ORIGINS: List[AnyHttpUrl] = []
     CORS_ORIGIN_REGEX: str | None = None
@@ -36,7 +37,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: str = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
     REFRESH_TOKEN_EXPIRE_DAYS: str = os.getenv("REFRESH_TOKEN_EXPIRE_DAYS")
     # redis
-    REDIS_HOST = "localhost"
+    REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
@@ -61,7 +62,7 @@ class Settings(BaseSettings):
 
 
 class LocalSettings(Settings):
-    RELOAD = True
+    RELOAD: bool = True
 
 
 class DevSettings(Settings):
@@ -71,7 +72,7 @@ class DevSettings(Settings):
         "http://музеум.рф",
         "http://xn--e1adoc6ac.xn--p1ai",
     ]
-    CORS_ORIGIN_REGEX = r"(http:\/\/localhost:5173|http:\/\/музеум\.рф|http:\/\/127\.0\.0\.1:5000|http:\/\/xn--e1adoc6ac\.xn--p1ai)"
+    CORS_ORIGIN_REGEX: str = r"(http:\/\/localhost:5173|http:\/\/музеум\.рф|http:\/\/127\.0\.0\.1:5000|http:\/\/xn--e1adoc6ac\.xn--p1ai)"
 
 
 settings_by_name = {

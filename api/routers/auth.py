@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
-
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 from api.configuration.config import settings
 from api import schemas
@@ -99,7 +97,7 @@ async def refresh_token(
 ) -> Response:
     stored_token = await RefreshToken.get_by_token(session, payload.refresh_token)
 
-    if not stored_token or stored_token.expires < datetime.now(UTC):
+    if not stored_token or stored_token.expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Invalid refresh token")
 
     user = await User.get_by_id(session, stored_token.user_id)

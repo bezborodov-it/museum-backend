@@ -63,7 +63,7 @@ class LocationBase(BaseModel):
     phone: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LocationCreate(BaseModel):
@@ -91,7 +91,7 @@ class EventVisitorCategoryBase(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class EventGenreCreate(BaseModel):
@@ -107,7 +107,7 @@ class EventGenreBase(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class EventTagCreate(BaseModel):
@@ -123,7 +123,7 @@ class EventTagBase(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class EventBase(BaseModel):
@@ -139,7 +139,7 @@ class EventBase(BaseModel):
     tag: List[EventTagBase] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ShallowEvent(BaseModel):
@@ -152,7 +152,7 @@ class ShallowEvent(BaseModel):
     nearest_date: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class EventFilterGet(BaseModel):
@@ -191,7 +191,7 @@ class PreferencesBase(BaseModel):
     tags: List[EventGenreBase]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class EventTicketGet(BaseModel):
@@ -202,4 +202,4 @@ class EventTicketGet(BaseModel):
     location: Optional[LocationBase]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

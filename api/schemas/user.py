@@ -7,7 +7,7 @@ class UserGet(BaseModel):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserBase(UserGet):
@@ -16,7 +16,7 @@ class UserBase(UserGet):
     name: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserUpdate(BaseModel):
