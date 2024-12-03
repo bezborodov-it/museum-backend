@@ -19,7 +19,7 @@ class TicketBase(BaseModel):
     qr_code: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class TicketCreate(BaseModel):
@@ -60,4 +60,4 @@ class ShallowTicket(BaseModel):
     event_date: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True

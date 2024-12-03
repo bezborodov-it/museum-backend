@@ -3,7 +3,7 @@ import string
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Tuple, Dict
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 from api.configuration.config import settings
 from api.models.orms import UserORM
@@ -15,7 +15,7 @@ async def generate_verification_code() -> str:
 
 def generate_jwt_token(data: Dict[str, any], expires_delta: timedelta) -> str:
     to_encode = data.copy()
-    expire = datetime.now(UTC) + expires_delta
+    expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
         to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
@@ -35,7 +35,7 @@ def create_access_token(user: UserORM) -> str:
 
 def create_refresh_token(user: UserORM) -> str:
     refresh_token_expires = timedelta(days=int(settings.REFRESH_TOKEN_EXPIRE_DAYS))
-    expire_at = datetime.now(UTC) + refresh_token_expires
+    expire_at = datetime.now(timezone.utc) + refresh_token_expires
 
     refresh_token = generate_jwt_token(
         data={"sub": user.number}, expires_delta=refresh_token_expires

@@ -50,7 +50,7 @@ class Ticket(Base):
         return await Ticket.update(session, ticket_id, updated_data)
 
     @classmethod
-    async def get_avaliable(
+    async def get_avaliable_event(
         cls, session: AsyncSession, event_id: int
     ) -> List[TicketORM]:
         query = select(TicketORM).filter(
@@ -132,3 +132,11 @@ class Ticket(Base):
                 },
             )
             return ticket
+
+    @classmethod
+    async def get_booked_all(cls, session: AsyncSession) -> List[TicketORM]:
+        query = select(TicketORM).filter(
+            TicketORM.status == TicketStatusEnum.booked,
+        )
+        result = await session.execute(query)
+        return result.scalars().all()

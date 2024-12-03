@@ -20,6 +20,10 @@ from api.models import UserORM
 from api.models.enums import FilterEventGenreEnum, FilterVisitorCategoryEnum
 from api.utils.image import save_event_image
 from api.service.redis import redis_service
+from api.service.celery import (
+    ticket_revert_transaction_without_payment,
+    ticket_revert_booked_without_transaction,
+)
 
 site_router = APIRouter(prefix="/ticket", tags=["ticket"])
 
@@ -68,6 +72,7 @@ async def purchase_ticket(
 ) -> Response:
     url = await Ticket.create_purchase_url(session, ticket_id, current_user.id)
     await redis_service.redis.set(ticket_id, url, ex=900)
+    ticket_revert_transaction_without_payment.apply_async((ticket_id,), countdown=910)
     return schemas.TicketPurchase(url=url)
 
 
@@ -88,6 +93,7 @@ async def payment_callback(
     session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     sold_ticket = await Ticket.update_after_success_purchase(session, payload.dict())
+    await redis_service.redis.delete(ticket_id)
     return sold_ticket
 
 
@@ -116,5 +122,5 @@ async def get_avaliable_tickets_by_event_id(
     session: AsyncSession = Depends(db_helper.session_getter),
     event_id: PositiveInt = Path(..., description="The identifier of event"),
 ) -> Response:
-    avaliable_tickets = await Ticket.get_avaliable(session, event_id)
+    avaliable_tickets = await Ticket.get_avaliable_event(session, event_id)
     return avaliable_tickets
