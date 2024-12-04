@@ -42,8 +42,10 @@ class YooMoney:
             str(self.notification_secret),
             str(notification_data["label"]),
         ]
+        print(params)
         params_string = "&".join(params)
         calculated_hash = hashlib.sha1(params_string.encode("utf-8")).hexdigest()
+        print(calculated_hash)
         if calculated_hash != notification_data["sha1_hash"]:
             raise InvalidPaymentHashError("The payment hash is invalid.")
         return True

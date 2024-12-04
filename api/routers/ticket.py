@@ -92,6 +92,7 @@ async def payment_callback(
     payload: schemas.PaymentCallback,
     session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
+    print(payload)
     sold_ticket = await Ticket.update_after_success_purchase(session, payload.dict())
     await redis_service.redis.delete(ticket_id)
     return sold_ticket
