@@ -1,4 +1,5 @@
 from typing import Optional, List
+from fastapi import Form
 from datetime import datetime
 from pydantic import validator, BaseModel, conint
 from enum import Enum
@@ -40,17 +41,46 @@ class TicketPurchase(BaseModel):
 
 
 class PaymentCallback(BaseModel):
-    notification_type: str
-    operation_id: str
-    amount: float
-    withdraw_amount: float
-    currency: str
-    datetime: datetime
-    sender: str
-    codepro: bool
-    label: str
-    sha1_hash: str
-    unaccepted: bool
+    notification_type: Optional[str]
+    operation_id: Optional[str]
+    amount: Optional[float]
+    withdraw_amount: Optional[float]
+    currency: Optional[str]
+    datetime: Optional[datetime]
+    sender: Optional[str]
+    codepro: Optional[bool]
+    label: Optional[str]
+    sha1_hash: Optional[str]
+    unaccepted: Optional[bool]
+
+    @classmethod
+    def as_form(
+            cls,
+            notification_type: Optional[str] = Form(...),
+            operation_id: Optional[str] = Form(...),
+            amount: Optional[float] = Form(...),
+            withdraw_amount: Optional[float] = Form(...),
+            currency: Optional[str] = Form(...),
+            datetime: Optional[datetime] = Form(...),
+            sender: Optional[str] = Form(...),
+            codepro: Optional[bool] = Form(...),
+            label: Optional[str] = Form(...),
+            sha1_hash: Optional[str] = Form(...),
+            unaccepted: Optional[bool] = Form(...),
+    ) -> "PaymentCallback":
+        return cls(
+            notification_type=notification_type,
+            operation_id=operation_id,
+            amount=amount,
+            withdraw_amount=withdraw_amount,
+            currency=currency,
+            datetime=datetime,
+            sender=sender,
+            codepro=codepro,
+            label=label,
+            sha1_hash=sha1_hash,
+            unaccepted=unaccepted,
+        )
 
 
 class ShallowTicket(BaseModel):
