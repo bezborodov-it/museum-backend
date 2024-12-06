@@ -56,17 +56,17 @@ class PaymentCallback(BaseModel):
     @classmethod
     def as_form(
             cls,
-            notification_type: Optional[str] = Form(...),
-            operation_id: Optional[str] = Form(...),
-            amount: Optional[float] = Form(...),
-            withdraw_amount: Optional[float] = Form(...),
-            currency: Optional[str] = Form(...),
-            datetime: Optional[datetime] = Form(...),
-            sender: Optional[str] = Form(...),
-            codepro: Optional[bool] = Form(...),
-            label: Optional[str] = Form(...),
-            sha1_hash: Optional[str] = Form(...),
-            unaccepted: Optional[bool] = Form(...),
+            notification_type: Optional[str] = Form(None),
+            operation_id: Optional[str] = Form(None),
+            amount: Optional[float] = Form(None),
+            withdraw_amount: Optional[float] = Form(None),
+            currency: Optional[str] = Form(None),
+            datetime: Optional[datetime] = Form(None),
+            sender: Optional[str] = Form(None),
+            codepro: Optional[bool] = Form(None),
+            label: Optional[str] = Form(None),
+            sha1_hash: Optional[str] = Form(None),
+            unaccepted: Optional[bool] = Form(None),
     ) -> "PaymentCallback":
         return cls(
             notification_type=notification_type,
