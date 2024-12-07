@@ -1,7 +1,7 @@
 from typing import Optional, List
 from fastapi import Form
 from datetime import datetime
-from pydantic import validator, BaseModel, conint
+from pydantic import validator, BaseModel, conint, Field
 from enum import Enum
 
 from api.models.enums import TicketStatusEnum, TicketTypeEnum
@@ -27,7 +27,9 @@ class TicketCreate(BaseModel):
     event_id: int
     type: TicketTypeEnum
     price: int
-    event_date: datetime
+    event_date: datetime = Field(
+        example="2024-12-08 17:00:00.959"
+    )
     quantity: conint(ge=1, le=100)
 
 

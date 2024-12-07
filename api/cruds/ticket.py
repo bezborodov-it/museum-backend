@@ -20,7 +20,7 @@ class Ticket(Base):
 
     @classmethod
     async def create_bulk(
-        cls, session: AsyncSession, data: Dict[str, Any]
+            cls, session: AsyncSession, data: Dict[str, Any]
     ) -> List[TicketORM]:
         quantity = data.pop("quantity", 1)
         tickets = []
@@ -34,7 +34,7 @@ class Ticket(Base):
 
     @classmethod
     async def book(
-        cls, session: AsyncSession, ticket_id: int, user_id: int
+            cls, session: AsyncSession, ticket_id: int, user_id: int
     ) -> List[TicketORM]:
         ticket = await cls.get_by_id(session, ticket_id)
 
@@ -51,7 +51,7 @@ class Ticket(Base):
 
     @classmethod
     async def get_avaliable_event(
-        cls, session: AsyncSession, event_id: int
+            cls, session: AsyncSession, event_id: int
     ) -> List[TicketORM]:
         query = select(TicketORM).filter(
             TicketORM.event_id == event_id,
@@ -62,15 +62,15 @@ class Ticket(Base):
 
     @classmethod
     async def create_purchase_url(
-        cls,
-        session: AsyncSession,
-        ticket_id: int,
-        user_id: int,
+            cls,
+            session: AsyncSession,
+            ticket_id: int,
+            user_id: int,
     ) -> schemas.TicketPurchase:
         ticket = await cls.get_by_id(session, ticket_id)
         if (
-            ticket.status == TicketStatusEnum.sold
-            or ticket.status == TicketStatusEnum.transaction
+                ticket.status == TicketStatusEnum.sold
+                or ticket.status == TicketStatusEnum.transaction
         ):
             raise TicketNotAvailableError("Ticket is not available for purchase.")
 
@@ -97,7 +97,7 @@ class Ticket(Base):
 
     @classmethod
     async def get_by_transaction_label(
-        cls, session: AsyncSession, label: str
+            cls, session: AsyncSession, label: str
     ) -> TicketORM:
         query = select(TicketORM).where(TicketORM.transaction_label == label)
         result = await session.execute(query)
@@ -105,38 +105,37 @@ class Ticket(Base):
 
     @classmethod
     async def update_after_success_purchase(
-        cls, session: AsyncSession, data: Dict
+            cls, session: AsyncSession, data: Dict
     ) -> TicketORM:
-        valid_hash = yoomoney.verify_payment(data)
-        if valid_hash:
-            ticket = await cls.get_by_transaction_label(session, data["label"])
-            if not ticket:
-                raise TicketNotAvailableError("Not found ticket with this label")
-            if ticket.status == TicketStatusEnum.sold:
-                raise TicketNotAvailableError("Ticket is already sold.")
+        ticket = await cls.get_by_transaction_label(session, data["label"])
+        if not ticket:
+            raise TicketNotAvailableError("Not found ticket with this label")
+        if ticket.status == TicketStatusEnum.sold:
+            raise TicketNotAvailableError("Ticket is already sold.")
 
-            qr_data = f"TicketID:{ticket.id}|Event:{ticket.event.id}|Date:{ticket.event_date}|Price:{ticket.price}"
-            qr_code = generate_qr_code_base64(qr_data)
+        qr_data = f"TicketID:{ticket.id}|Event:{ticket.event.id}|Date:{ticket.event_date}|Price:{ticket.price}"
+        qr_code = generate_qr_code_base64(qr_data)
 
-            datetime_without_tz = (
-                data["datetime"].astimezone(timezone.utc).replace(tzinfo=None)
-            )
-
-            await Ticket.update(
-                session,
-                ticket.id,
-                {
-                    "status": TicketStatusEnum.sold,
-                    "purchased_at": datetime_without_tz,
-                    "qr_code": qr_code,
-                },
-            )
-            return ticket
-
-    @classmethod
-    async def get_booked_all(cls, session: AsyncSession) -> List[TicketORM]:
-        query = select(TicketORM).filter(
-            TicketORM.status == TicketStatusEnum.booked,
+        datetime_without_tz = (
+            data["datetime"].astimezone(timezone.utc).replace(tzinfo=None)
         )
-        result = await session.execute(query)
-        return result.scalars().all()
+
+        await Ticket.update(
+            session,
+            ticket.id,
+            {
+                "status": TicketStatusEnum.sold,
+                "purchased_at": datetime_without_tz,
+                "qr_code": qr_code,
+            },
+        )
+        return ticket
+
+
+@classmethod
+async def get_booked_all(cls, session: AsyncSession) -> List[TicketORM]:
+    query = select(TicketORM).filter(
+        TicketORM.status == TicketStatusEnum.booked,
+    )
+    result = await session.execute(query)
+    return result.scalars().all()
