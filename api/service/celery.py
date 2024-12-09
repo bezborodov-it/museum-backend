@@ -58,7 +58,8 @@ async def process_ticket_revert(ticket_id: int):
 @celery.task(name="ticket_revert_booked_without_transaction")
 def ticket_revert_booked_without_transaction():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(process_revert_booked_without_transaction())
+    result = loop.run_until_complete(process_revert_booked_without_transaction())
+    return result
 
 
 async def process_revert_booked_without_transaction():
@@ -66,6 +67,7 @@ async def process_revert_booked_without_transaction():
         async for session in db_helper.session_getter():
             tickets = await Ticket.get_booked_all(session)
 
+            updated_tickets = []
             for ticket in tickets:
                 time_left = ticket.event_date - datetime.now()
 
@@ -79,6 +81,9 @@ async def process_revert_booked_without_transaction():
                             "booked_at": None,
                         },
                     )
-                print(f"Ticket {ticket.id} returned to available status.")
+                    updated_tickets.append(ticket.id)
+                    print(f"Ticket {ticket.id} returned to available status.")
+            return {"updated_tickets": updated_tickets}
     except Exception as e:
         print(f"Error in task ticket_revert_booked_without_transaction: {e}")
+        return {"error": str(e)}

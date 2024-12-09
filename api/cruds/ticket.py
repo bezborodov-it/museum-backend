@@ -131,11 +131,10 @@ class Ticket(Base):
         )
         return ticket
 
-
-@classmethod
-async def get_booked_all(cls, session: AsyncSession) -> List[TicketORM]:
-    query = select(TicketORM).filter(
-        TicketORM.status == TicketStatusEnum.booked,
-    )
-    result = await session.execute(query)
-    return result.scalars().all()
+    @classmethod
+    async def get_booked_all(cls, session: AsyncSession) -> List[TicketORM]:
+        query = select(TicketORM).filter(
+            TicketORM.status == TicketStatusEnum.booked,
+        )
+        result = await session.execute(query)
+        return result.scalars().all()
