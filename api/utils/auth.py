@@ -4,6 +4,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Tuple, Dict
 from datetime import datetime, timezone
+from passlib.context import CryptContext
 
 from api.configuration.config import settings
 from api.models.orms import UserORM
@@ -52,3 +53,8 @@ def decode_access_token(token: str):
         return payload
     except JWTError:
         return None
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    return pwd_context.verify(plain_password, hashed_password)
