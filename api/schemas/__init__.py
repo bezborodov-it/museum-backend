@@ -19,6 +19,8 @@ from .event import (
     ShallowEvent,
     EventFilterGet,
     EventTicketGet,
+    EventsAdminGet,
+    EventAdminGet
 )
 from .email import EmailGet, EmailCreate
 from .user import UserGet, UserBase, UserUpdate
@@ -78,4 +80,6 @@ __all__ = (
     "TicketPurchase",
     "PaymentCallback",
     "ShallowTicket",
+    "EventsAdminGet",
+    "EventAdminGet"
 )

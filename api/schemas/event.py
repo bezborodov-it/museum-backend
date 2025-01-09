@@ -155,6 +155,14 @@ class ShallowEvent(BaseModel):
         from_attributes = True
 
 
+class ShallowAdminEvent(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
 class EventFilterGet(BaseModel):
     items: List[ShallowEvent]
     total: int
@@ -203,3 +211,15 @@ class EventTicketGet(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class EventsAdminGet(BaseModel):
+    items: List[ShallowAdminEvent]
+    total: int
+
+
+class EventAdminGet(BaseModel):
+    event: EventBase
+    ticket_available: int
+    ticket_booked: int
+    ticket_sold: int
