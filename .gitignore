@@ -31,3 +31,4 @@ archive.zip
 # creds
 .env
 /api/static/event/
+hs_err_pid18504.log
