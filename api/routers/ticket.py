@@ -18,7 +18,6 @@ from api.configuration.database.db_helper import db_helper
 from api.dependencies import get_current_user, is_admin, get_image_with
 from api.models import UserORM
 from api.models.enums import FilterEventGenreEnum, FilterVisitorCategoryEnum
-from api.utils.image import save_event_image
 from api.service.redis import redis_service
 from api.service.celery import (
     ticket_revert_transaction_without_payment,

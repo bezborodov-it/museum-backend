@@ -9,6 +9,7 @@ from api.cruds import Event, Ticket
 from api.configuration.database.db_helper import db_helper
 from api.dependencies import get_basic_user, is_admin, get_image_with
 from api.models import UserORM
+from api.utils.image import save_event_image
 
 site_router = APIRouter(prefix="/admin", tags=["admin"])
 
