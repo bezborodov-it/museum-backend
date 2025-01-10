@@ -33,26 +33,6 @@ response_codes = {
 }
 
 
-@site_router.post(
-    "",
-    response_model=List[schemas.TicketBase],
-    status_code=201,
-    responses={
-        201: {"description": "Success"},
-        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def create_tickets(
-        payload: schemas.TicketCreate,
-        session: AsyncSession = Depends(db_helper.session_getter),
-        current_user: UserORM = Depends(is_admin),
-) -> Response:
-    tickets = await Ticket.create_bulk(session, payload.dict())
-    return tickets
-
-
 @site_router.post("/book/{ticket_id}", response_model=schemas.TicketBase)
 async def book_ticket(
         ticket_id: PositiveInt,

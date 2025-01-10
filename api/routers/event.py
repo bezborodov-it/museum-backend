@@ -170,24 +170,24 @@ async def get_event_by_id(
     return event
 
 
-@site_router.post(
-    "/location",
-    response_model=schemas.LocationBase,
-    status_code=201,
-    responses={
-        201: {"description": "Success"},
-        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def create_location(
-        payload: schemas.LocationCreate,
-        current_user: UserORM = Depends(is_admin),
-        session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    new_location = await Location.create(session, payload.dict())
-    return new_location
+# @site_router.post(
+#     "/location",
+#     response_model=schemas.LocationBase,
+#     status_code=201,
+#     responses={
+#         201: {"description": "Success"},
+#         400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+#         404: {"description": "Not found", "model": schemas.ErrorNotFound},
+#         500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+#     },
+# )
+# async def create_location(
+#         payload: schemas.LocationCreate,
+#         current_user: UserORM = Depends(is_admin),
+#         session: AsyncSession = Depends(db_helper.session_getter),
+# ) -> Response:
+#     new_location = await Location.create(session, payload.dict())
+#     return new_location
 
 
 @site_router.get(
@@ -204,27 +204,27 @@ async def get_location_by_id(
     return location
 
 
-@site_router.put(
-    "/location/{location_id}",
-    response_model=schemas.LocationBase,
-    status_code=200,
-    responses={
-        200: {"description": "Success"},
-        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def update_location_by_id(
-        payload: schemas.LocationUpdate,
-        session: AsyncSession = Depends(db_helper.session_getter),
-        location_id: PositiveInt = Path(..., description="The identifier of location"),
-        current_user: UserORM = Depends(is_admin),
-) -> Response:
-    updated_location = await Location.update(
-        session, location_id, payload.dict(exclude_unset=True)
-    )
-    return updated_location
+# @site_router.put(
+#     "/location/{location_id}",
+#     response_model=schemas.LocationBase,
+#     status_code=200,
+#     responses={
+#         200: {"description": "Success"},
+#         400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+#         404: {"description": "Not found", "model": schemas.ErrorNotFound},
+#         500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+#     },
+# )
+# async def update_location_by_id(
+#         payload: schemas.LocationUpdate,
+#         session: AsyncSession = Depends(db_helper.session_getter),
+#         location_id: PositiveInt = Path(..., description="The identifier of location"),
+#         current_user: UserORM = Depends(is_admin),
+# ) -> Response:
+#     updated_location = await Location.update(
+#         session, location_id, payload.dict(exclude_unset=True)
+#     )
+#     return updated_location
 
 
 @site_router.get(
