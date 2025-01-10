@@ -12,6 +12,7 @@ services:
       - "8080:8080"
     volumes:
       - ./static:/app/static
+      - ~/sites/museum-backend/static:/app/static
     networks:
       - museum
 
