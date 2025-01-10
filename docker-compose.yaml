@@ -10,6 +10,8 @@ services:
       - ./.env
     ports:
       - "8080:8080"
+    volumes:
+      - ./static:/app/static
     networks:
       - museum
 
