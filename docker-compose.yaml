@@ -3,7 +3,6 @@ version: '3'
 services:
   api:
     build: .
-    image: ${IMAGE}:${TAG}
     restart: always
     container_name: mus_api_${API_MODE}
     env_file:
@@ -74,7 +73,7 @@ services:
       - museum
 
   beat:
-    image: ${IMAGE}:${TAG}
+    build: .
     container_name: celery_beat
     command: celery -A api.service.celery beat --loglevel=info
     depends_on:
