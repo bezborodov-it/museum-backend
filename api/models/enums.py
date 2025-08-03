@@ -100,3 +100,7 @@ class FilterTicketTypeEnum(str, Enum):
     adult = "adult"
     discount = "discount"
     child = "child"
+
+class NotificationTypeEnum(str, Enum):
+    personal = "personal"
+    mass = "mass"

@@ -45,6 +45,7 @@ class UserORM(BaseORM, DateORMMixin):
     )
 
     tickets = relationship("TicketORM", back_populates="user", lazy="selectin")
+    push_token = relationship("PushTokenORM", back_populates="user", lazy="selectin")
 
     def __repr__(self) -> str:
         return f"<{self.__tablename__} {self.name} {self.number}>"

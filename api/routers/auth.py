@@ -31,7 +31,7 @@ async def send_code(
 ) -> Response:
     verification_code = await generate_verification_code()
     await redis_service.redis.set(payload.number, verification_code, ex=300)
-
+    print(verification_code)
     message = settings.AUTH_MESSAGE_TEMPLATE.format(verification_code=verification_code)
     response = await whatsapp_bot.send_message(payload.number, message)
 

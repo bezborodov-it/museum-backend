@@ -8,6 +8,9 @@ from .event import (
 )
 from .ticket import TicketORM
 from .location import LocationORM
+from .push_token import PushTokenORM
+from api.models.orms.notification.notification_sent import NotificationSentORM
+from .notification import NotificationORM, NotificationSentORM
 
 __all__ = (
     "BaseORM",
@@ -20,4 +23,7 @@ __all__ = (
     "VisitorCategoryORM",
     "LocationORM",
     "TicketORM",
+    "PushTokenORM",
+    "NotificationSentORM",
+    "NotificationORM"
 )

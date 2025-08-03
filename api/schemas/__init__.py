@@ -41,7 +41,7 @@ from .ticket import (
     PaymentCallback,
     ShallowTicket,
 )
-
+from .notification import PushTokenBase, PushTokenCreate, NotificationCreate
 
 __all__ = (
     "PhoneNumberGet",
@@ -81,5 +81,8 @@ __all__ = (
     "PaymentCallback",
     "ShallowTicket",
     "EventsAdminGet",
-    "EventAdminGet"
+    "EventAdminGet",
+    "PushTokenBase",
+    "PushTokenCreate",
+    "NotificationCreate",
 )

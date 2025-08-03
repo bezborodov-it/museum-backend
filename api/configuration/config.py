@@ -59,6 +59,8 @@ class Settings(BaseSettings):
     YOOMONEY_QUIQPAY_FORM: str = os.getenv("", "YOOMONEY_QUIQPAY_FORM")
     YOOMONEY_PAYMENT_TYPE: str = os.getenv("", "YOOMONEY_PAYMENT_TYPE")
     YOOMONEY_NOTIFICATION_SECRET: str = os.getenv("", "YOOMONEY_NOTIFICATION_SECRET")
+    # Expo push notifications
+    EXPO_NOTIFICATIONS_URL: str = os.getenv("", "EXPO_NOTIFICATIONS_URL")
 
 
 class LocalSettings(Settings):

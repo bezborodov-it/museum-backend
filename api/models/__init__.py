@@ -10,6 +10,9 @@ from .orms import (
     VisitorCategoryORM,
     LocationORM,
     TicketORM,
+    PushTokenORM,
+    NotificationSentORM,
+    NotificationORM
 )
 
 __all__ = (
@@ -27,4 +30,8 @@ __all__ = (
     "VisitorCategoryORM",
     "LocationORM",
     "TicketORM",
+    # notification
+    "PushTokenORM",
+    "NotificationSentORM",
+    "NotificationORM"
 )
