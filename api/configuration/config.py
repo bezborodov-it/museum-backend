@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+    CELERY_TIMEZONE: str = os.getenv("CELERY_TIMEZONE", "")
     # Static
     STATIC_DIR: str = os.getenv("STATIC_DIR", "./api/static/")
     # email
@@ -59,6 +60,11 @@ class Settings(BaseSettings):
     YOOMONEY_QUIQPAY_FORM: str = os.getenv("", "YOOMONEY_QUIQPAY_FORM")
     YOOMONEY_PAYMENT_TYPE: str = os.getenv("", "YOOMONEY_PAYMENT_TYPE")
     YOOMONEY_NOTIFICATION_SECRET: str = os.getenv("", "YOOMONEY_NOTIFICATION_SECRET")
+    # Expo push notifications
+    EXPO_NOTIFICATIONS_URL: str = os.getenv("", "EXPO_NOTIFICATIONS_URL")
+    # RabbitMQ
+    RABBIT_USER: str = os.getenv("", "RABBIT_USER")
+    RABBIT_PASSWORD: str = os.getenv("", "RABBIT_PASSWORD")
 
 
 class LocalSettings(Settings):
@@ -73,7 +79,9 @@ class DevSettings(Settings):
         "http://музеум.рф",
         "http://xn--e1adoc6ac.xn--p1ai",
     ]
-    CORS_ORIGIN_REGEX: str = r"(http:\/\/localhost:5173|http:\/\/localhost:8081|http:\/\/музеум\.рф|http:\/\/127\.0\.0\.1:5000|http:\/\/xn--e1adoc6ac\.xn--p1ai)"
+    CORS_ORIGIN_REGEX: str = (
+        r"(http:\/\/localhost:5173|http:\/\/localhost:8081|http:\/\/музеум\.рф|http:\/\/127\.0\.0\.1:5000|http:\/\/xn--e1adoc6ac\.xn--p1ai)"
+    )
 
 
 settings_by_name = {

@@ -1,12 +1,9 @@
-from datetime import datetime, date
+from datetime import datetime, timezone, date
 from sqlalchemy import Column, DateTime
-from sqlalchemy.ext.declarative import declared_attr
-import pytz
 
 
-def now(timezone_str: str = "Asia/Yekaterinburg") -> datetime:
-    tz = pytz.timezone(timezone_str)
-    return datetime.now(tz)
+def now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class DateORMMixin:

@@ -1,17 +1,18 @@
-from typing import Callable, TypeVar, Type, Any, Dict, List, Tuple, Set
-from sqlalchemy import select, insert, inspect
-from sqlalchemy.orm import RelationshipProperty
+from typing import Callable, TypeVar, Type, Any, Dict, List, Generic
+from sqlalchemy import select, inspect, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.exceptions.cruds import ModelNotFoundError
+from api.exceptions.cruds import NotFoundError
 from api.models import BaseORM
 
+T = TypeVar("T", bound=BaseORM)
 
-class Base:
-    model: Type[BaseORM]
+
+class Base(Generic[T]):
+    model: Type[T]
 
     @classmethod
-    async def create(cls, session: AsyncSession, data: Dict[str, Any]) -> BaseORM:
+    async def create(cls, session: AsyncSession, data: Dict[str, Any]) -> T:
         obj_data = {
             key: value for key, value in data.items() if not isinstance(value, list)
         }
@@ -26,19 +27,17 @@ class Base:
         return obj
 
     @classmethod
-    async def get_by_id(cls, session: AsyncSession, id_: int) -> BaseORM:
+    async def get_by_id(cls, session: AsyncSession, id_: int) -> T:
         primary_key_column = inspect(cls.model).primary_key[0]
         query = select(cls.model).where(primary_key_column == id_)
         result = await session.execute(query)
         obj = result.scalar_one_or_none()
         if obj is None:
-            raise ModelNotFoundError(cls.model.__tablename__, "id", id_)
+            raise NotFoundError(cls.model.__tablename__, "id", id_)
         return obj
 
     @classmethod
-    async def update(
-        cls, session: AsyncSession, id_: int, data: Dict[str, Any]
-    ) -> BaseORM:
+    async def update(cls, session: AsyncSession, id_: int, data: Dict[str, Any]) -> T:
         obj = await cls.get_by_id(session, id_)
         for key, value in data.items():
             if not isinstance(value, list):
@@ -71,7 +70,31 @@ class Base:
         await session.commit()
 
     @classmethod
-    async def get_all(cls, session: AsyncSession) -> list:
+    async def get_admin_list(
+        cls,
+        session: AsyncSession,
+        search: str,
+        offset: int = 0,
+        limit: int = 10,
+    ) -> tuple[List[T], int]:
+        query = select(cls.model)
+
+        if search:
+            query = query.where(cls.model.name.ilike(f"%{search}%"))
+
+        total_count = await session.scalar(
+            select(func.count()).select_from(query.subquery())
+        )
+
+        query = query.offset(offset).limit(limit)
+        result = await session.execute(query)
+
+        items = result.scalars().all()
+
+        return items, total_count
+
+    @classmethod
+    async def get_all(cls, session: AsyncSession) -> List[T]:
         query = select(cls.model)
         result = await session.execute(query)
         return result.scalars().all()

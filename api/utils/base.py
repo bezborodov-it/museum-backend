@@ -1,3 +1,7 @@
+from datetime import datetime, timezone
+import pytz
+
+
 def camel_case_to_snake_case(input_str: str) -> str:
     chars = []
     for c_idx, char in enumerate(input_str):
@@ -11,3 +15,12 @@ def camel_case_to_snake_case(input_str: str) -> str:
                 chars.append("_")
         chars.append(char.lower())
     return "".join(chars)
+
+
+def str_ekb_to_utc(value: str) -> datetime:
+    parsed_time = datetime.fromisoformat(value.replace('Z', ''))
+    yekaterinburg_tz = pytz.timezone("Asia/Yekaterinburg")
+    localized_time = yekaterinburg_tz.localize(parsed_time)
+
+    return localized_time.astimezone(timezone.utc)
+

@@ -1,19 +1,18 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
-from sqlalchemy.exc import NoResultFound, IntegrityError
-from api.cruds.base import ModelNotFoundError
+from sqlalchemy.exc import IntegrityError
+from api.cruds.base import NotFoundError
 from api.dependencies.image import ImageUploadError
-from api.exceptions.base import TicketNotAvailableError, InvalidPaymentHashError
 
 
 def init_exception_handlers(app: FastAPI):
-    @app.exception_handler(ModelNotFoundError)
-    async def model_not_found_handler(request: Request, exc: ModelNotFoundError):
+    @app.exception_handler(NotFoundError)
+    async def model_not_found_handler(request: Request, exc: NotFoundError):
         return JSONResponse(
             status_code=404,
             content={
-                "detail": f"{exc.model.title()} not found",
+                "detail": f"{exc.model.title()} with {exc.field}={exc.value} not found"
             },
         )
 
@@ -26,31 +25,9 @@ def init_exception_handlers(app: FastAPI):
             },
         )
 
-    @app.exception_handler(TicketNotAvailableError)
-    async def ticket_not_available_handler(
-        request: Request, exc: TicketNotAvailableError
-    ):
-        return JSONResponse(
-            status_code=400,
-            content={
-                "detail": exc.message,
-            },
-        )
-
-    @app.exception_handler(InvalidPaymentHashError)
-    async def invalid_payment_hash_handler(
-        request: Request, exc: InvalidPaymentHashError
-    ):
-        return JSONResponse(
-            status_code=400,
-            content={
-                "detail": exc.message,
-            },
-        )
-
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
-        request: Request, exc: RequestValidationError
+            request: Request, exc: RequestValidationError
     ):
         return JSONResponse(
             status_code=422,
@@ -59,7 +36,7 @@ def init_exception_handlers(app: FastAPI):
 
     @app.exception_handler(ResponseValidationError)
     async def validation_exception_handler(
-        request: Request, exc: ResponseValidationError
+            request: Request, exc: ResponseValidationError
     ):
         return JSONResponse(
             status_code=422,
@@ -81,4 +58,24 @@ def init_exception_handlers(app: FastAPI):
         return JSONResponse(
             status_code=500,
             content={"message": "Internal Server Error", "detail": str(exc)},
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+            request: Request, exc: RequestValidationError
+    ):
+        error_details = []
+        for error in exc.errors():
+            error_detail = {
+                "loc": error["loc"],
+                "msg": error["msg"],
+                "type": error["type"]
+            }
+            if "input" in error:
+                error_detail["input"] = error["input"]
+            error_details.append(error_detail)
+
+        return JSONResponse(
+            status_code=400,
+            content={"detail": error_details},
         )

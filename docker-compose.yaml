@@ -1,9 +1,6 @@
-version: '3'
-
 services:
   api:
     build: .
-    image: ${IMAGE}:${TAG}
     restart: always
     container_name: mus_api_${API_MODE}
     env_file:
@@ -11,7 +8,9 @@ services:
     ports:
       - "8080:8080"
     volumes:
+      - ./:/app
       - ./api/static:/app/api/static
+      - ./logs:/app/logs
     networks:
       - museum
 
@@ -40,13 +39,13 @@ services:
 
   worker:
     build: .
-    command: celery -A api.service.celery worker --loglevel=info
+    command: celery -A api.celery.worker worker --loglevel=INFO --logfile=/app/logs/celery.log
     restart: always
     depends_on:
       - redis
     environment:
-      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_BROKER_URL=amqp://${RABBIT_USER}:${RABBIT_PASSWORD}@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=rpc://
     networks:
       - museum
     volumes:
@@ -56,7 +55,7 @@ services:
   flower:
     build: .
     container_name: flower
-    command: celery --broker=redis://:${REDIS_PASSWORD}@redis:6379/0 flower --port=5555
+    command: celery --broker=amqp://${RABBIT_USER}:${RABBIT_PASSWORD}@rabbitmq:5672// flower --port=5555
     restart: always
     ports:
       - "5555:5555"
@@ -65,25 +64,23 @@ services:
       - redis
       - worker
     environment:
-      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_BROKER_URL=amqp://${RABBIT_USER}:${RABBIT_PASSWORD}@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=rpc://
     volumes:
       - .:/app
     working_dir: /app
     networks:
       - museum
 
-  beat:
-    image: ${IMAGE}:${TAG}
-    container_name: celery_beat
-    command: celery -A api.service.celery beat --loglevel=info
-    depends_on:
-      - redis
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-    volumes:
-      - .:/app
-    working_dir: /app
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
     networks:
       - museum
 

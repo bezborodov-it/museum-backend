@@ -2,14 +2,14 @@ from .mixin import DateORMMixin
 from .orms import (
     BaseORM,
     UserORM,
-    UserRoleORM,
-    RefreshTokenORM,
     EventORM,
-    EventTagORM,
-    EventGenreORM,
+    TagORM,
+    GenreORM,
     VisitorCategoryORM,
     LocationORM,
-    TicketORM,
+    PushTokenORM,
+    NotificationORM,
+    CategoryORM,
 )
 
 __all__ = (
@@ -18,13 +18,14 @@ __all__ = (
     "DateORMMixin",
     # user
     "UserORM",
-    "UserRoleORM",
-    "RefreshTokenORM",
     # event
     "EventORM",
-    "EventTagORM",
-    "EventGenreORM",
+    "TagORM",
+    "GenreORM",
     "VisitorCategoryORM",
     "LocationORM",
-    "TicketORM",
+    "CategoryORM",
+    # notification
+    "PushTokenORM",
+    "NotificationORM",
 )

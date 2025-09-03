@@ -1,34 +1,54 @@
-from sqlalchemy import BigInteger, Boolean, Column, String, ForeignKey, Table
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    String,
+    ForeignKey,
+    DateTime,
+    Text,
+    Integer,
+    SmallInteger,
+)
 from sqlalchemy.orm import relationship
 
 from api.models.mixin.date import DateORMMixin
 from api.models.orms.base import BaseORM
 from api.models.associations import (
-    user_genre_preference_association,
-    user_tag_preference_association,
-    event_visitor_category_association,
+    push_token_genre_association,
+    push_token_tag_association,
     event_tag_association,
+    exhibition_tag_association, push_token_visitor_category_association,
 )
 
 
 class EventORM(BaseORM, DateORMMixin):
     id = Column(BigInteger, primary_key=True)
     name = Column(String)
-    description = Column(String)
+    description = Column(Text)
     image_url = Column(String, nullable=True)
     disabilities = Column(Boolean, default=False)
-    location_id = Column(BigInteger, ForeignKey("location.id"), nullable=True)
-    genre_id = Column(BigInteger, ForeignKey("event_genre.id"), nullable=True)
+    date_start = Column(DateTime, nullable=False)
+    payment_url = Column(String, nullable=True)
+    is_free = Column(Boolean, nullable=False)
+    pushkin_card = Column(Boolean, nullable=False)
+    min_price = Column(Integer, nullable=True)
+    pinned_order = Column(SmallInteger, nullable=True, default=None)
+
+    location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
+    genre_id = Column(BigInteger, ForeignKey("genre.id"), nullable=False)
+    visitor_category_id = Column(
+        BigInteger, ForeignKey("visitor_category.id"), nullable=False
+    )
+    category_id = Column(BigInteger, ForeignKey("category.id"), nullable=True)
 
     visitor_category = relationship(
         "VisitorCategoryORM",
-        secondary=event_visitor_category_association,
         back_populates="events",
         lazy="selectin",
     )
 
     genre = relationship(
-        "EventGenreORM",
+        "GenreORM",
         back_populates="events",
         lazy="selectin",
     )
@@ -39,14 +59,74 @@ class EventORM(BaseORM, DateORMMixin):
         lazy="selectin",
     )
 
-    tag = relationship(
-        "EventTagORM",
+    tags = relationship(
+        "TagORM",
         secondary=event_tag_association,
         back_populates="events",
         lazy="selectin",
     )
 
-    tickets = relationship("TicketORM", back_populates="event", lazy="selectin")
+    category = relationship(
+        "CategoryORM",
+        back_populates="events",
+        lazy="selectin",
+    )
+
+    def __repr__(self) -> str:
+        return f"<{self.__tablename__} {self.id} {self.name}>"
+
+
+class ExhibitionORM(BaseORM, DateORMMixin):
+    id = Column(BigInteger, primary_key=True)
+    name = Column(String)
+    description = Column(String)
+    image_url = Column(String, nullable=True)
+    disabilities = Column(Boolean, default=False)
+    date_start = Column(DateTime, nullable=False)
+    date_end = Column(DateTime, nullable=False)
+    payment_url = Column(String, nullable=True)
+    min_price = Column(Integer, nullable=True)
+    is_free = Column(Boolean, nullable=False)
+    pushkin_card = Column(Boolean, nullable=False)
+    pinned_order = Column(SmallInteger, nullable=True, default=None)
+
+    location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
+    genre_id = Column(BigInteger, ForeignKey("genre.id"), nullable=False)
+    visitor_category_id = Column(
+        BigInteger, ForeignKey("visitor_category.id"), nullable=False
+    )
+    category_id = Column(BigInteger, ForeignKey("category.id"), nullable=True)
+
+    visitor_category = relationship(
+        "VisitorCategoryORM",
+        back_populates="exhibitions",
+        lazy="selectin",
+    )
+
+    genre = relationship(
+        "GenreORM",
+        back_populates="exhibitions",
+        lazy="selectin",
+    )
+
+    location = relationship(
+        "LocationORM",
+        back_populates="exhibitions",
+        lazy="selectin",
+    )
+
+    tags = relationship(
+        "TagORM",
+        secondary=exhibition_tag_association,
+        back_populates="exhibitions",
+        lazy="selectin",
+    )
+
+    category = relationship(
+        "CategoryORM",
+        back_populates="exhibitions",
+        lazy="selectin",
+    )
 
     def __repr__(self) -> str:
         return f"<{self.__tablename__} {self.id} {self.name}>"
@@ -58,8 +138,20 @@ class VisitorCategoryORM(BaseORM):
 
     events = relationship(
         "EventORM",
-        secondary=event_visitor_category_association,
         back_populates="visitor_category",
+        lazy="selectin",
+    )
+
+    exhibitions = relationship(
+        "ExhibitionORM",
+        back_populates="visitor_category",
+        lazy="selectin",
+    )
+
+    push_tokens = relationship(
+        "PushTokenORM",
+        secondary=push_token_visitor_category_association,
+        back_populates="visitor_categories",
         lazy="selectin",
     )
 
@@ -67,7 +159,7 @@ class VisitorCategoryORM(BaseORM):
         return f"<{self.__tablename__} {self.id} {self.name}>"
 
 
-class EventGenreORM(BaseORM):
+class GenreORM(BaseORM):
     id = Column(BigInteger, primary_key=True)
     name = Column(String, nullable=False)
 
@@ -77,9 +169,15 @@ class EventGenreORM(BaseORM):
         lazy="selectin",
     )
 
-    users = relationship(
-        "UserORM",
-        secondary=user_genre_preference_association,
+    exhibitions = relationship(
+        "ExhibitionORM",
+        back_populates="genre",
+        lazy="selectin",
+    )
+
+    push_tokens = relationship(
+        "PushTokenORM",
+        secondary=push_token_genre_association,
         back_populates="genres",
         lazy="selectin",
     )
@@ -88,21 +186,67 @@ class EventGenreORM(BaseORM):
         return f"<{self.__tablename__} {self.id} {self.name}>"
 
 
-class EventTagORM(BaseORM):
+class TagORM(BaseORM):
     id = Column(BigInteger, primary_key=True)
     name = Column(String, nullable=False)
 
     events = relationship(
         "EventORM",
         secondary=event_tag_association,
-        back_populates="tag",
+        back_populates="tags",
         lazy="selectin",
     )
 
-    users = relationship(
-        "UserORM",
-        secondary=user_tag_preference_association,
+    exhibitions = relationship(
+        "ExhibitionORM",
+        secondary=exhibition_tag_association,
         back_populates="tags",
+        lazy="selectin",
+    )
+
+    push_tokens = relationship(
+        "PushTokenORM",
+        secondary=push_token_tag_association,
+        back_populates="tags",
+        lazy="selectin",
+    )
+
+    def __repr__(self) -> str:
+        return f"<{self.__tablename__} {self.id} {self.name}>"
+
+
+class LocationORM(BaseORM):
+    id = Column(BigInteger, primary_key=True)
+    name = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+
+    events = relationship(
+        "EventORM",
+        back_populates="location",
+        lazy="selectin",
+    )
+    exhibitions = relationship(
+        "ExhibitionORM",
+        back_populates="location",
+        lazy="selectin",
+    )
+
+    def __repr__(self) -> str:
+        return f"<{self.__tablename__} {self.id} {self.name}>"
+
+
+class CategoryORM(BaseORM):
+    id = Column(BigInteger, primary_key=True)
+    name = Column(String, nullable=False)
+
+    events = relationship(
+        "EventORM",
+        back_populates="category",
+        lazy="selectin",
+    )
+    exhibitions = relationship(
+        "ExhibitionORM",
+        back_populates="category",
         lazy="selectin",
     )
 
