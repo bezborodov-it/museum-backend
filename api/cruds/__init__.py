@@ -1,23 +1,23 @@
-from .user import User
-from .refresh_token import RefreshToken
+from .category import Category
 from .event import Event
-from .event_genre import EventGenre
-from .event_tag import EventTag
+from .genre import Genre
+from .tag import Tag
 from .location import Location
-from .visitor_category import EventVisitorCategory
-from .ticket import Ticket
+from .visitor_category import VisitorCategory
 from .push_token import PushToken
 from .notification import Notification
+from .exhibition import Exhibition
+from .user import User
 
 __all__ = (
-    "User",
-    "RefreshToken",
     "Event",
-    "EventGenre",
-    "EventTag",
+    "Genre",
+    "Tag",
     "Location",
-    "EventVisitorCategory",
-    "Ticket",
+    "VisitorCategory",
     "PushToken",
     "Notification",
+    "Exhibition",
+    "User",
+    "Category",
 )

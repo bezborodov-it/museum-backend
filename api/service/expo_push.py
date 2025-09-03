@@ -10,32 +10,20 @@ class ExpoPushNotification:
     def __init__(self):
         self.url = settings.EXPO_NOTIFICATIONS_URL
 
-    async def send_personal_message(self, push_token: str, title: str, body: str, data: dict = None):
-        payload = {
-            "to": f"ExponentPushToken[{push_token}]",
-            "title": title,
-            "body": body
-        }
-        if data is not None:
-            payload['data'] = data
-        async with httpx.AsyncClient() as client:
-            response = await client.post(self.url, headers=HEADERS, json=payload)
-        return response.json()
-
-    async def send_mass_message(self, push_tokens: list, title: str, body: str, data: dict = None):
+    def send_mass_message(
+            self, push_tokens: list, title: str, body: str
+    ):
         results = []
-        for i in range(0, len(push_tokens), 100):
-            batch = push_tokens[i:i + 100]
-            payload = {
-                "to": [f"ExponentPushToken[{token}]" for token in batch],
-                "title": title,
-                "body": body,
-            }
-            if data is not None:
-                payload['data'] = data
+        with httpx.Client() as client:
+            for i in range(0, len(push_tokens), 100):
+                batch = push_tokens[i: i + 100]
+                payload = {
+                    "to": [f"ExponentPushToken[{token}]" for token in batch],
+                    "title": title,
+                    "body": body,
+                }
 
-            async with httpx.AsyncClient() as client:
-                response = await client.post(self.url, headers=HEADERS, json=payload)
+                response = client.post(self.url, headers=HEADERS, json=payload)
                 results.append(response.json())
         return results
 

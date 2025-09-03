@@ -1,7 +1,5 @@
 from datetime import datetime, timezone, date
 from sqlalchemy import Column, DateTime
-from sqlalchemy.ext.declarative import declared_attr
-import pytz
 
 
 def now() -> datetime:

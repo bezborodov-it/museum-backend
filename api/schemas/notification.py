@@ -1,38 +1,55 @@
-from typing import Optional, Dict, Any
-from datetime import datetime
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, field_validator
-import pytz
+from datetime import datetime, timezone
+
+from api.utils.base import str_ekb_to_utc
 
 
 class PushTokenBase(BaseModel):
     id: int
-    expo_push_token: str
-    is_active: bool
+    push_token: str
     created_at: datetime
-    last_used: Optional[datetime]
+    updated_at: datetime
 
     class Config:
         from_attributes = True
 
 
 class PushTokenCreate(BaseModel):
-    expo_push_token: str
+    push_token: str
+
+
+class NotificationBase(BaseModel):
+    id: int
+    title: str
+    body: str
+    time_to_send: datetime
+
+    class Config:
+        from_attributes = True
+
+class NotificationsAdminGet(BaseModel):
+    items: List[NotificationBase]
+    total: int
+
+
+class NotificationsGet(BaseModel):
+    items: List[NotificationBase]
+    total: int
+
 
 class NotificationCreate(BaseModel):
     title: str
     body: str
     time_to_send: datetime
-    data: Optional[Dict[str, Any]] = None
 
-    @field_validator('time_to_send', mode='before')
+    @field_validator("time_to_send", mode="before")
     @classmethod
-    def parse_and_convert_to_utc(cls, value: str) -> datetime:
+    def convert_and_validate(cls, value: str) -> datetime:
+        dt_utc = str_ekb_to_utc(value)
+        now_utc = datetime.now(timezone.utc)
 
-        parsed_time = datetime.fromisoformat(value)
-        yekaterinburg_tz = pytz.timezone('Asia/Yekaterinburg')
-        localized_time = yekaterinburg_tz.localize(parsed_time)
+        if dt_utc < now_utc:
+            raise ValueError("Время отправки должно быть в будущем")
 
-        return localized_time.astimezone(pytz.UTC)
-
-    class Config:
-        arbitrary_types_allowed = True
+        return dt_utc

@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Path, UploadFile, Query
+from fastapi import APIRouter, Depends, status, Response, Path, UploadFile, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime, timezone
 from pydantic import PositiveInt
-from typing import List
+from typing import Optional
 
 from api import schemas
-from api.cruds import Event, Ticket
+from api.cruds import Event, Exhibition
 from api.configuration.database.db_helper import db_helper
-from api.dependencies import get_basic_user, is_admin, get_image_with
+from api.dependencies import get_basic_user, get_image_with
 from api.models import UserORM
-from api.utils.image import save_event_image
+from api.utils.image import save_image
 
 site_router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -21,30 +20,35 @@ response_codes = {
 
 
 @site_router.get(
-    "/event/all",
+    "/events",
+    tags=["event"],
     status_code=200,
     response_model=schemas.EventsAdminGet,
-    responses=response_codes,
+    responses={
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
 )
 async def get_admin_events(
-        offset: int = Query(0, ge=0, description="Offset"),
-        limit: int = Query(10, gt=0, le=100, description="Limit"),
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+    search: Optional[str] = Query(None, description="Search string"),
+    offset: int = Query(0, ge=0, description="Offset"),
+    limit: int = Query(10, gt=0, le=100, description="Limit"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    events, total_count = await Event.get_admin(
+    events, total_count = await Event.get_admin_list(
         session,
+        search,
         offset,
         limit,
     )
-    return {
-        "items": events,
-        "total": total_count,
-    }
+    return schemas.EventsAdminGet(items=events, total=total_count)
 
 
 @site_router.post(
     "/event",
+    tags=["event"],
     response_model=schemas.EventBase,
     status_code=201,
     responses={
@@ -55,37 +59,18 @@ async def get_admin_events(
     },
 )
 async def create_event(
-        payload: schemas.EventCreate,
-        session: AsyncSession = Depends(db_helper.session_getter),
-        current_user: UserORM = Depends(get_basic_user),
+    payload: schemas.EventCreate,
+    session: AsyncSession = Depends(db_helper.session_getter),
+    current_user: UserORM = Depends(get_basic_user),
 ) -> Response:
-    new_event = await Event.create(session, payload.dict())
-    return new_event
+    event = await Event.create(session, payload.model_dump())
+    return event
 
 
-@site_router.get(
-    "/event/{event_id}",
-    response_model=schemas.EventAdminGet,
-    status_code=200,
-    responses=response_codes,
-)
-async def get_admin_event_by_id(
-        event_id: PositiveInt = Path(..., description="The identifier of event"),
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    event, ticket_available, ticket_booked, ticket_sold = await Event.get_admin_event_by_id(session, event_id)
-    return schemas.EventAdminGet(
-        event=event,
-        ticket_available=ticket_available,
-        ticket_booked=ticket_booked,
-        ticket_sold=ticket_sold,
-    )
-
-
-@site_router.put(
+@site_router.patch(
     "/event/{event_id}",
     response_model=schemas.EventBase,
+    tags=["event"],
     status_code=200,
     responses={
         200: {"description": "Success"},
@@ -95,21 +80,39 @@ async def get_admin_event_by_id(
     },
 )
 async def update_event_by_id(
-        pyload: schemas.EventUpdate,
-        event_id: PositiveInt = Path(..., description="The identifier of event"),
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+    payload: schemas.EventUpdate,
+    event_id: PositiveInt = Path(..., description="The identifier of event"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    updated_event = await Event.update(
-        session, event_id, pyload.dict(exclude_unset=True)
-    )
-    return updated_event
+    event = await Event.update(session, event_id, payload.model_dump())
+    return event
+
+
+@site_router.delete(
+    "/event/{event_id}",
+    status_code=204,
+    tags=["event"],
+    responses={
+        200: {"description": "Success"},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def delete_event_by_id(
+    event_id: PositiveInt = Path(..., description="The identifier of event"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    await Event.delete(session, event_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @site_router.post(
     "/event/{event_id}/upload_logo",
     status_code=200,
     response_model=schemas.EventBase,
+    tags=["event"],
     responses={
         200: {"description": "Success"},
         400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
@@ -118,39 +121,20 @@ async def update_event_by_id(
     },
 )
 async def upload_logo_by_event_id(
-        event_id: PositiveInt = Path(..., description="The identifier of event"),
-        file: UploadFile = Depends(get_image_with),
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+    event_id: PositiveInt = Path(..., description="The identifier of event"),
+    file: UploadFile = Depends(get_image_with),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    image_url = save_event_image(file)
-    updated_event = await Event.update_image_url(session, event_id, image_url)
-    return updated_event
-
-
-@site_router.delete(
-    "/event/{event_id}",
-    status_code=204,
-    responses={
-        200: {"description": "Success"},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def delete_event_by_id(
-        event_id: PositiveInt = Path(..., description="The identifier of event"),
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    await Event.delete(
-        session, event_id
-    )
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    image_url = save_image(file)
+    event = await Event.update_image_url(session, event_id, image_url)
+    return event
 
 
 @site_router.post(
-    "/ticket",
-    response_model=List[schemas.TicketBase],
+    "/exhibition",
+    tags=["exhibition"],
+    response_model=schemas.ExhibitionBase,
     status_code=201,
     responses={
         201: {"description": "Success"},
@@ -159,10 +143,101 @@ async def delete_event_by_id(
         500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
     },
 )
-async def create_tickets(
-        payload: schemas.TicketCreate,
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+async def create_exhibition(
+    payload: schemas.ExhibitionCreate,
+    session: AsyncSession = Depends(db_helper.session_getter),
+    current_user: UserORM = Depends(get_basic_user),
 ) -> Response:
-    tickets = await Ticket.create_bulk(session, payload.dict())
-    return tickets
+    exhibition = await Exhibition.create(session, payload.model_dump())
+    return schemas.ExhibitionBase.model_validate(exhibition)
+
+
+@site_router.get(
+    "/exhibitions",
+    tags=["exhibition"],
+    status_code=200,
+    response_model=schemas.ExhibitionsAdminGet,
+    responses={
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def get_admin_exhibitions(
+    search: Optional[str] = Query(None, description="Search string"),
+    offset: int = Query(0, ge=0, description="Offset"),
+    limit: int = Query(10, gt=0, le=100, description="Limit"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    exhibitions, total_count = await Exhibition.get_admin_list(
+        session,
+        search,
+        offset,
+        limit,
+    )
+    return schemas.ExhibitionsAdminGet(items=exhibitions, total=total_count)
+
+
+@site_router.patch(
+    "/exhibition/{exhibition_id}",
+    response_model=schemas.ExhibitionBase,
+    tags=["exhibition"],
+    status_code=200,
+    responses={
+        200: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def update_exhibition_by_id(
+    pyload: schemas.ExhibitionUpdate,
+    exhibition_id: PositiveInt = Path(..., description="The identifier of exhibition"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    exhibition = await Exhibition.update(session, exhibition_id, pyload.model_dump())
+    return exhibition
+
+
+@site_router.delete(
+    "/exhibition/{exhibition_id}",
+    tags=["exhibition"],
+    status_code=204,
+    responses={
+        200: {"description": "Success"},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def delete_exhibition_by_id(
+    exhibition_id: PositiveInt = Path(..., description="The identifier of event"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    await Exhibition.delete(session, exhibition_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@site_router.post(
+    "/exhibition/{exhibition_id}/upload_logo",
+    status_code=200,
+    tags=["exhibition"],
+    response_model=schemas.ExhibitionBase,
+    responses={
+        200: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def upload_logo_by_exhibition_id(
+    exhibition_id: PositiveInt = Path(..., description="The identifier of exhibition"),
+    file: UploadFile = Depends(get_image_with),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    image_url = save_image(file)
+    exhibition = await Exhibition.update_image_url(session, exhibition_id, image_url)
+    return exhibition

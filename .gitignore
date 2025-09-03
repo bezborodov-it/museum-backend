@@ -33,3 +33,6 @@ archive.zip
 /api/static/event/
 hs_err_pid18504.log
 celerybeat-schedule
+
+logs
+api/static

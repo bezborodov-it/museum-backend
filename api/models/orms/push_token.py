@@ -1,34 +1,39 @@
-from sqlalchemy import (
-    BigInteger,
-    Boolean,
-    Column,
-    ForeignKey,
-    DateTime,
-    String
-)
+from sqlalchemy import BigInteger, Column, String
 from sqlalchemy.orm import relationship
 
 from api.models import DateORMMixin
 from api.models.orms.base import BaseORM
+from api.models.associations import (
+    push_token_genre_association,
+    push_token_tag_association,
+    push_token_visitor_category_association,
+)
+
 
 class PushTokenORM(BaseORM, DateORMMixin):
     id = Column(BigInteger, primary_key=True)
-    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
-    expo_push_token = Column(String, unique=True, nullable=False)
-    is_active = Column(Boolean, nullable=False, server_default='true')
-    last_used = Column(DateTime, nullable=True)
+    push_token = Column(String, unique=True, nullable=False)
 
-    user = relationship(
-        "UserORM",
-        back_populates="push_token",
+    genres = relationship(
+        "GenreORM",
+        secondary=push_token_genre_association,
+        back_populates="push_tokens",
         lazy="selectin",
     )
 
-    notifications = relationship(
-        "NotificationORM",
-        back_populates="push_token",
+    tags = relationship(
+        "TagORM",
+        secondary=push_token_tag_association,
+        back_populates="push_tokens",
+        lazy="selectin",
+    )
+
+    visitor_categories = relationship(
+        "VisitorCategoryORM",
+        secondary=push_token_visitor_category_association,
+        back_populates="push_tokens",
         lazy="selectin",
     )
 
     def __repr__(self) -> str:
-        return f"<{self.__tablename__} {self.user_id} {self.id}>"
+        return f"<{self.__tablename__} {self.id} {self.push_token}>"

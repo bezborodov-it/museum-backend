@@ -1,8 +1,7 @@
 from api.cruds.base import Base, with_model
-from api.models.orms.notification.notification_sent import NotificationSentORM
+from api.models import NotificationORM
 
 
-@with_model(NotificationSentORM)
+@with_model(NotificationORM)
 class Notification(Base):
     pass
-
