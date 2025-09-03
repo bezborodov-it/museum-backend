@@ -40,7 +40,7 @@ class Base(Generic[T]):
     async def update(cls, session: AsyncSession, id_: int, data: Dict[str, Any]) -> T:
         obj = await cls.get_by_id(session, id_)
         for key, value in data.items():
-            if not isinstance(value, list):
+            if value is not None and not isinstance(value, list):
                 setattr(obj, key, value)
 
         await cls._update_related_fields(session, obj, data)
