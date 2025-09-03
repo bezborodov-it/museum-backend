@@ -63,6 +63,7 @@ class TagBase(BaseModel):
 
 class EventBase(BaseModel):
     id: int
+    pinned_order: Optional[int]
     name: str
     description: str
     disabilities: bool
@@ -173,6 +174,7 @@ class EventAdminGet(BaseModel):
 
 class ExhibitionBase(BaseModel):
     id: int
+    pinned_order: Optional[int]
     name: str
     description: str
     disabilities: bool
