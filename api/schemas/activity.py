@@ -28,6 +28,14 @@ class VisitorCategoryBase(BaseModel):
     class Config:
         from_attributes = True
 
+class CategoryBase(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
 
 class GenreCreate(BaseModel):
     name: str
@@ -67,7 +75,7 @@ class EventBase(BaseModel):
     location: LocationBase
     visitor_category: VisitorCategoryBase
     genre: GenreBase
-    category: Optional[VisitorCategoryBase]
+    category: Optional[CategoryBase]
 
     tags: List[TagBase]
 
@@ -87,7 +95,7 @@ class ShallowEvent(BaseModel):
     pushkin_card: bool
     location: LocationBase
     visitor_category: VisitorCategoryBase
-    category: Optional[VisitorCategoryBase]
+    category: Optional[CategoryBase]
 
     class Config:
         from_attributes = True
@@ -125,6 +133,7 @@ class EventCreate(BaseModel):
 
 class EventUpdate(BaseModel):
     name: Optional[str] = None
+    pinned_order: Optional[int] = None
     description: Optional[str] = None
     disabilities: Optional[bool] = None
     date_start: Optional[datetime] = None
@@ -178,7 +187,7 @@ class ExhibitionBase(BaseModel):
     location: LocationBase
     visitor_category: VisitorCategoryBase
     genre: GenreBase
-    category: Optional[VisitorCategoryBase]
+    category: Optional[CategoryBase]
 
     tags: List[TagBase]
 
@@ -200,7 +209,7 @@ class ShallowExhibition(BaseModel):
 
     location: LocationBase
     visitor_category: VisitorCategoryBase
-    category: Optional[VisitorCategoryBase]
+    category: Optional[CategoryBase]
 
     class Config:
         from_attributes = True
@@ -231,6 +240,7 @@ class ExhibitionCreate(BaseModel):
 
 class ExhibitionUpdate(BaseModel):
     name: Optional[str] = None
+    pinned_order: Optional[int] = None
     description: Optional[str] = None
     disabilities: Optional[bool] = None
     date_start: Optional[datetime] = None
@@ -268,14 +278,6 @@ class ActivityPreferencesCreate(BaseModel):
 class ActivityPreferencesGet(BaseModel):
     events: List[ShallowEvent]
     exhibitions: List[ShallowExhibition]
-
-
-class CategoryBase(BaseModel):
-    id: int
-    name: str
-
-    class Config:
-        from_attributes = True
 
 
 class CategoryCreate(BaseModel):
