@@ -117,6 +117,7 @@ class EventFilterGet(BaseModel):
 
 class EventCreate(BaseModel):
     name: str
+    pinned_order: Optional[int] = None
     description: str
     disabilities: bool
     date_start: datetime
