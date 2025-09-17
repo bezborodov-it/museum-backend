@@ -225,6 +225,7 @@ class ExhibitionFilterGet(BaseModel):
 
 class ExhibitionCreate(BaseModel):
     name: str
+    pinned_order: Optional[int]
     description: str
     disabilities: bool
     date_start: datetime
