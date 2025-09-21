@@ -29,6 +29,7 @@ class Exhibition(Base):
         genre_ids: List[int] = None,
         location_ids: List[int] = None,
         visitor_category_ids: List[int] = None,
+        category_ids: List[int] = None,
         disabilities: bool = None,
         is_free: bool = None,
         pushkin_card: bool = None,
@@ -45,6 +46,9 @@ class Exhibition(Base):
 
         if visitor_category_ids:
             query = query.filter(cls.model.genre_id.in_(visitor_category_ids))
+
+        if category_ids:
+            query = query.filter(cls.model.category_id.in_(category_ids))
 
         if disabilities is not None:
             query = query.filter(cls.model.disabilities == disabilities)
