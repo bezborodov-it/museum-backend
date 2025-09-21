@@ -38,7 +38,7 @@ class Exhibition(Base):
         limit: int = 10,
     ) -> List[ExhibitionORM]:
         query = select(cls.model)
-        query = query.filter(cls.model.date_start >= datetime.now() + timedelta(hours=5))
+        query = query.filter(cls.model.date_end >= datetime.now() + timedelta(hours=5))
 
         if genre_ids:
             query = query.filter(cls.model.genre_id.in_(genre_ids))

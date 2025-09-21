@@ -39,8 +39,7 @@ class Event(Base):
     ) -> List[EventORM]:
         query = select(cls.model)
         query = query.filter(cls.model.date_start >= datetime.now() + timedelta(hours=5))
-        print(query)
-        print(datetime.now() + timedelta(hours=5))
+
         if genre_ids:
             query = query.filter(cls.model.genre_id.in_(genre_ids))
 
