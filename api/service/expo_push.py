@@ -18,7 +18,7 @@ class ExpoPushNotification:
             for i in range(0, len(push_tokens), 100):
                 batch = push_tokens[i: i + 100]
                 payload = {
-                    "to": [f"ExponentPushToken[{token}]" for token in batch],
+                    "to": [f"{token}" for token in batch],
                     "title": title,
                     "body": body,
                 }
