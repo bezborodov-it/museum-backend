@@ -82,7 +82,7 @@ class Base(Generic[T]):
         if search:
             query = query.where(cls.model.name.ilike(f"%{search}%"))
 
-        query = query.order_by(cls.model.name.desc())
+        query = query.order_by(cls.model.id.desc())
         total_count = await session.scalar(
             select(func.count()).select_from(query.subquery())
         )
