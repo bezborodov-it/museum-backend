@@ -1,5 +1,6 @@
 from sqlalchemy import select, or_, func, case
 from typing import List, Tuple
+from datetime import  datetime, timedelta
 
 from api.cruds.base import Base, with_model
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,6 +38,7 @@ class Exhibition(Base):
         limit: int = 10,
     ) -> List[ExhibitionORM]:
         query = select(cls.model)
+        query = query.filter(cls.model.date_start >= datetime.now() + timedelta(hours=5))
 
         if genre_ids:
             query = query.filter(cls.model.genre_id.in_(genre_ids))
