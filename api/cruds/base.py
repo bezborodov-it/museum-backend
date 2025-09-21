@@ -82,6 +82,7 @@ class Base(Generic[T]):
         if search:
             query = query.where(cls.model.name.ilike(f"%{search}%"))
 
+        query = query.order_by(cls.model.name.desc())
         total_count = await session.scalar(
             select(func.count()).select_from(query.subquery())
         )
@@ -95,7 +96,7 @@ class Base(Generic[T]):
 
     @classmethod
     async def get_all(cls, session: AsyncSession) -> List[T]:
-        query = select(cls.model)
+        query = select(cls.model).order_by(cls.model.id)
         result = await session.execute(query)
         return result.scalars().all()
 
