@@ -48,7 +48,7 @@ async def get_notifications(
         current_user: UserORM = Depends(get_basic_user),
         session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    notifications, total_count = await Notification.get_admin_list(session, search, offset, limit)
+    notifications, total_count = await Notification.get_admin_list(session, search, offset, limit, True)
     return schemas.NotificationsAdminGet(items=notifications, total=total_count)
 
 

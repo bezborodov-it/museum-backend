@@ -76,11 +76,13 @@ class Base(Generic[T]):
         search: str,
         offset: int = 0,
         limit: int = 10,
+        is_notification: bool = False,
     ) -> tuple[List[T], int]:
         query = select(cls.model)
 
         if search:
-            query = query.where(cls.model.name.ilike(f"%{search}%"))
+            field = cls.model.title if is_notification else cls.model.name
+            query = query.where(field.ilike(f"%{search}%"))
 
         query = query.order_by(cls.model.id.desc())
         total_count = await session.scalar(
