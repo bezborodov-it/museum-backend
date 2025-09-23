@@ -47,7 +47,7 @@ class Exhibition(Base):
             query = query.filter(cls.model.location_id.in_(location_ids))
 
         if visitor_category_ids:
-            query = query.filter(cls.model.genre_id.in_(visitor_category_ids))
+            query = query.filter(cls.model.visitor_category_ids.in_(visitor_category_ids))
 
         if category_ids:
             query = query.filter(cls.model.category_id.in_(category_ids))
