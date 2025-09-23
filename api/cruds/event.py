@@ -66,6 +66,7 @@ class Event(Base):
             cls.model.pinned_order.is_(None),
             cls.model.pinned_order.asc(),
             func.min(cls.model.date_start).asc(),
+            cls.model.id.asc()
         )
 
         total_count = await session.scalar(
