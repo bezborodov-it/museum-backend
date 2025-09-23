@@ -93,6 +93,7 @@ class Exhibition(Base):
         tags = [t.id for t in push_token_obj.tags] if push_token_obj.tags else None
 
         query = select(cls.model)
+        query = query.filter(cls.model.date_end >= datetime.now() + timedelta(hours=5))
 
         if tags:
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))

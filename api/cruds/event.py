@@ -49,7 +49,6 @@ class Event(Base):
         if visitor_category_ids:
             query = query.filter(cls.model.visitor_category_id.in_(visitor_category_ids))
 
-        print(123)
         if category_ids:
             query = query.filter(cls.model.category_id.in_(category_ids))
 
@@ -94,6 +93,7 @@ class Event(Base):
         tags = [t.id for t in push_token_obj.tags] if push_token_obj.tags else None
 
         query = select(cls.model)
+        query = query.filter(cls.model.date_start >= datetime.now() + timedelta(hours=5))
 
         if tags:
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
