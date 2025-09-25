@@ -30,6 +30,7 @@ class EventORM(BaseORM, DateORMMixin):
     date_start = Column(DateTime, nullable=False)
     payment_url = Column(String, nullable=True)
     is_free = Column(Boolean, nullable=False)
+    privilege_ticket = Column(Boolean, nullable=False, default=False)
     pushkin_card = Column(Boolean, nullable=False)
     min_price = Column(Integer, nullable=True)
     pinned_order = Column(SmallInteger, nullable=True, default=None)
@@ -87,6 +88,7 @@ class ExhibitionORM(BaseORM, DateORMMixin):
     payment_url = Column(String, nullable=True)
     min_price = Column(Integer, nullable=True)
     is_free = Column(Boolean, nullable=False)
+    privilege_ticket = Column(Boolean, nullable=False)
     pushkin_card = Column(Boolean, nullable=False)
     pinned_order = Column(SmallInteger, nullable=True, default=None)
 

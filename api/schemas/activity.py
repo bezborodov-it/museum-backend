@@ -70,6 +70,7 @@ class EventBase(BaseModel):
     image_url: Optional[str]
     date_start: datetime
     is_free: bool
+    privilege_ticket: bool
     pushkin_card: bool
     min_price: Optional[int]
     payment_url: Optional[str]
@@ -93,6 +94,7 @@ class ShallowEvent(BaseModel):
     date_start: datetime
     min_price: Optional[int]
     is_free: bool
+    privilege_ticket: bool
     pushkin_card: bool
     location: LocationBase
     visitor_category: VisitorCategoryBase
@@ -123,6 +125,7 @@ class EventCreate(BaseModel):
     date_start: datetime
     payment_url: Optional[str] = None
     is_free: bool
+    privilege_ticket: bool
     pushkin_card: bool
     min_price: Optional[int] = None
     location_id: Optional[int] = None
@@ -141,6 +144,7 @@ class EventUpdate(BaseModel):
     date_start: Optional[datetime] = None
     payment_url: Optional[str] = None
     is_free: Optional[bool] = None
+    privilege_ticket: Optional[bool] = None
     pushkin_card: Optional[bool] = None
     min_price: Optional[int] = None
     location_id: Optional[int] = None
@@ -184,6 +188,7 @@ class ExhibitionBase(BaseModel):
     date_end: datetime
     min_price: Optional[int]
     is_free: bool
+    privilege_ticket: bool
     pushkin_card: bool
     payment_url: Optional[str]
 
@@ -208,6 +213,7 @@ class ShallowExhibition(BaseModel):
     date_end: datetime
     min_price: Optional[int]
     is_free: bool
+    privilege_ticket: bool
     pushkin_card: bool
 
     location: LocationBase
@@ -232,6 +238,7 @@ class ExhibitionCreate(BaseModel):
     date_end: datetime
     payment_url: Optional[str] = None
     is_free: bool
+    privilege_ticket: bool
     pushkin_card: bool
     min_price: Optional[int] = None
     location_id: Optional[int] = None
@@ -251,6 +258,7 @@ class ExhibitionUpdate(BaseModel):
     date_end: Optional[datetime] = None
     payment_url: Optional[str] = None
     is_free: Optional[bool] = None
+    privilege_ticket: Optional[bool] = None
     pushkin_card: Optional[bool] = None
     min_price: Optional[int] = None
     location_id: Optional[int] = None

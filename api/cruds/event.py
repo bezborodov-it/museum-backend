@@ -33,6 +33,7 @@ class Event(Base):
         category_ids: List[int] = None,
         disabilities: bool = None,
         is_free: bool = None,
+        privilege_ticket: bool = None,
         pushkin_card: bool = None,
         offset: int = 0,
         limit: int = 10,
@@ -60,6 +61,9 @@ class Event(Base):
 
         if pushkin_card is not None:
             query = query.filter(cls.model.pushkin_card == pushkin_card)
+
+        if privilege_ticket is not None:
+            query = query.filter(cls.model.privilege_ticket == privilege_ticket)
 
         query = query.group_by(cls.model.id)
         query = query.order_by(
