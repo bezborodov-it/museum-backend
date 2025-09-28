@@ -35,6 +35,7 @@ class Event(Base):
         is_free: bool = None,
         privilege_ticket: bool = None,
         pushkin_card: bool = None,
+        audio_guide: bool = None,
         offset: int = 0,
         limit: int = 10,
     ) -> List[EventORM]:
@@ -64,6 +65,9 @@ class Event(Base):
 
         if privilege_ticket is not None:
             query = query.filter(cls.model.privilege_ticket == privilege_ticket)
+
+        if audio_guide is not None:
+            query = query.filter(cls.model.audio_guide == audio_guide)
 
         query = query.group_by(cls.model.id)
         query = query.order_by(

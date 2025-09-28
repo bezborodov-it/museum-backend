@@ -72,6 +72,7 @@ class EventBase(BaseModel):
     is_free: bool
     privilege_ticket: bool
     pushkin_card: bool
+    audio_guide: bool
     min_price: Optional[int]
     payment_url: Optional[str]
     location: LocationBase
@@ -94,6 +95,7 @@ class ShallowEvent(BaseModel):
     date_start: datetime
     min_price: Optional[int]
     is_free: bool
+    audio_guide: bool
     privilege_ticket: bool
     pushkin_card: bool
     location: LocationBase
@@ -125,6 +127,7 @@ class EventCreate(BaseModel):
     date_start: datetime
     payment_url: Optional[str] = None
     is_free: bool
+    audio_guide: bool
     privilege_ticket: bool
     pushkin_card: bool
     min_price: Optional[int] = None
@@ -144,6 +147,7 @@ class EventUpdate(BaseModel):
     date_start: Optional[datetime] = None
     payment_url: Optional[str] = None
     is_free: Optional[bool] = None
+    audio_guide: Optional[bool] = None
     privilege_ticket: Optional[bool] = None
     pushkin_card: Optional[bool] = None
     min_price: Optional[int] = None
@@ -188,6 +192,7 @@ class ExhibitionBase(BaseModel):
     date_end: datetime
     min_price: Optional[int]
     is_free: bool
+    audio_guide: bool
     privilege_ticket: bool
     pushkin_card: bool
     payment_url: Optional[str]
@@ -213,6 +218,7 @@ class ShallowExhibition(BaseModel):
     date_end: datetime
     min_price: Optional[int]
     is_free: bool
+    audio_guide: bool
     privilege_ticket: bool
     pushkin_card: bool
 
@@ -238,6 +244,7 @@ class ExhibitionCreate(BaseModel):
     date_end: datetime
     payment_url: Optional[str] = None
     is_free: bool
+    audio_guide: bool
     privilege_ticket: bool
     pushkin_card: bool
     min_price: Optional[int] = None
@@ -258,6 +265,7 @@ class ExhibitionUpdate(BaseModel):
     date_end: Optional[datetime] = None
     payment_url: Optional[str] = None
     is_free: Optional[bool] = None
+    audio_guide: Optional[bool] = None
     privilege_ticket: Optional[bool] = None
     pushkin_card: Optional[bool] = None
     min_price: Optional[int] = None
