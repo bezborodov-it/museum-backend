@@ -91,7 +91,6 @@ class ExhibitionORM(BaseORM, DateORMMixin):
     is_free = Column(Boolean, nullable=False)
     privilege_ticket = Column(Boolean, nullable=False)
     pushkin_card = Column(Boolean, nullable=False)
-    audio_guide = Column(Boolean, nullable=False)
     pinned_order = Column(SmallInteger, nullable=True, default=None)
 
     location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)

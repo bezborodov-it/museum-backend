@@ -45,7 +45,6 @@ async def get_events(
     is_free: bool = Query(None, description="Is free"),
     privilege_ticket: bool = Query(None, description="Privilege ticket"),
     pushkin_card: bool = Query(None, description="Pay by pushkin card"),
-    audio_guide: bool = Query(None, description="Has audio guide"),
     offset: int = Query(0, ge=0, description="Offset"),
     limit: int = Query(10, gt=0, le=100, description="Limit"),
     session: AsyncSession = Depends(db_helper.session_getter),
@@ -60,7 +59,6 @@ async def get_events(
         is_free,
         privilege_ticket,
         pushkin_card,
-        audio_guide,
         offset,
         limit,
     )
