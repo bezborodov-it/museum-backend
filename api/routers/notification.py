@@ -25,8 +25,8 @@ response_codes = {
     responses=response_codes,
 )
 async def save_push_token(
-        payload: schemas.PushTokenCreate,
-        session: AsyncSession = Depends(db_helper.session_getter),
+    payload: schemas.PushTokenCreate,
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     token = await PushToken.get_by_token(session, payload.push_token)
     if token:
@@ -36,34 +36,30 @@ async def save_push_token(
     return push_token
 
 
-@site_router.get(
-    "s",
-    tags=["admin"],
-    response_model=schemas.NotificationsAdminGet
-)
+@site_router.get("s", tags=["admin"], response_model=schemas.NotificationsAdminGet)
 async def get_notifications(
-        search: Optional[str] = Query(None, description="Search string"),
-        offset: int = Query(0, ge=0, description="Offset"),
-        limit: int = Query(10, gt=0, le=100, description="Limit"),
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+    search: Optional[str] = Query(None, description="Search string"),
+    offset: int = Query(0, ge=0, description="Offset"),
+    limit: int = Query(10, gt=0, le=100, description="Limit"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    notifications, total_count = await Notification.get_admin_list(session, search, offset, limit, True)
+    notifications, total_count = await Notification.get_admin_list(
+        session, search, offset, limit, True
+    )
     return schemas.NotificationsAdminGet(items=notifications, total=total_count)
 
 
 @site_router.post("/mass-message", tags=["admin"], status_code=202)
 async def send_mass_message(
-        payload: schemas.NotificationCreate,
-        current_user: UserORM = Depends(get_basic_user),
-        session: AsyncSession = Depends(db_helper.session_getter),
+    payload: schemas.NotificationCreate,
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     try:
         notification = await Notification.create(session, payload.model_dump())
         push_tokens = await PushToken.get_all(session)
-        tokens = [
-            token.push_token for token in push_tokens
-        ]
+        tokens = [token.push_token for token in push_tokens]
         send_mass_push.apply_async(
             args=[notification.id, tokens, payload.title, payload.body],
             eta=payload.time_to_send,

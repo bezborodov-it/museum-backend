@@ -1,20 +1,8 @@
 from typing import Optional, List
 from datetime import datetime
-from pydantic import validator, BaseModel
+from pydantic import BaseModel
 
-
-class LocationBase(BaseModel):
-    id: int
-    name: str
-    address: str
-
-    class Config:
-        from_attributes = True
-
-
-class LocationCreate(BaseModel):
-    name: str
-    address: str
+from .location import LocationBase
 
 
 class VisitorCategoryCreate(BaseModel):
@@ -28,13 +16,13 @@ class VisitorCategoryBase(BaseModel):
     class Config:
         from_attributes = True
 
+
 class CategoryBase(BaseModel):
     id: int
     name: str
 
     class Config:
         from_attributes = True
-
 
 
 class GenreCreate(BaseModel):
@@ -272,12 +260,14 @@ class ExhibitionUpdate(BaseModel):
 
     tags: Optional[List[int]] = []
 
+
 class ShallowAdminExhibition(BaseModel):
     id: int
     name: str
 
     class Config:
         from_attributes = True
+
 
 class ExhibitionsAdminGet(BaseModel):
     items: List[ShallowAdminExhibition]

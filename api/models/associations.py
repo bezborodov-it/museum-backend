@@ -55,3 +55,16 @@ push_token_visitor_category_association = Table(
         primary_key=True,
     ),
 )
+
+location_accessibility = Table(
+    "location_accessibility",
+    BaseORM.metadata,
+    Column(
+        "location_id", ForeignKey("location.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "accessibility_id",
+        ForeignKey("accessibility.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)

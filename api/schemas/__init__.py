@@ -2,8 +2,6 @@ from .activity import (
     EventBase,
     EventCreate,
     EventUpdate,
-    LocationBase,
-    LocationCreate,
     VisitorCategoryBase,
     VisitorCategoryCreate,
     GenreCreate,
@@ -34,7 +32,27 @@ from .notification import (
     NotificationCreate,
     NotificationBase,
     NotificationsGet,
-    NotificationsAdminGet
+    NotificationsAdminGet,
+)
+
+from .location import (
+    AccessibilityBase,
+    AccessibilityCreate,
+    LocationCreate,
+    LocationUpdate,
+    LocationShallow,
+    LocationBase,
+    AboutBase,
+    AboutUpdate,
+)
+
+from .navigation import (
+    NavigationPointBase,
+    NavigationPointCreate,
+    NavigationPointUpdate,
+    NavigationFloorBase,
+    NavigationFloorCreate,
+    NavigationFloorUpdate,
 )
 
 __all__ = (
@@ -70,5 +88,15 @@ __all__ = (
     "ActivityPreferencesGet",
     "CategoryBase",
     "CategoryCreate",
-    "NotificationsAdminGet"
+    "NotificationsAdminGet",
+    "AccessibilityBase",
+    "AccessibilityCreate",
+    "AboutBase",
+    "AboutUpdate",
+    "NavigationPointBase",
+    "NavigationPointCreate",
+    "NavigationPointUpdate",
+    "NavigationFloorBase",
+    "NavigationFloorCreate",
+    "NavigationFloorUpdate",
 )

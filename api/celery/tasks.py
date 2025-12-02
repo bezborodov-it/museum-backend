@@ -4,6 +4,7 @@ from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
 
+
 @celery.task(name="send_mass_push")
 def send_mass_push(notification_id: int, tokens: list, title: str, body: str):
     try:
@@ -14,5 +15,8 @@ def send_mass_push(notification_id: int, tokens: list, title: str, body: str):
         )
         return {"Sent notifications to": len(tokens)}
     except Exception as e:
-        logger.error(f"Push notification failed for notification_id={notification_id}: {e}", exc_info=True)
+        logger.error(
+            f"Push notification failed for notification_id={notification_id}: {e}",
+            exc_info=True,
+        )
         return {"error": str(e)}

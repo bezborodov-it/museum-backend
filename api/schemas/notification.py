@@ -28,6 +28,7 @@ class NotificationBase(BaseModel):
     class Config:
         from_attributes = True
 
+
 class NotificationsAdminGet(BaseModel):
     items: List[NotificationBase]
     total: int
