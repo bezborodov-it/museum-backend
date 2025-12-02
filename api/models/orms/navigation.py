@@ -17,6 +17,7 @@ class NavigationFloorORM(BaseORM, DateORMMixin):
         back_populates="floor",
         lazy="selectin",
         cascade="all, delete-orphan",
+        order_by="NavigationPointORM.number"
     )
 
     def __repr__(self) -> str:
