@@ -5,12 +5,15 @@ from .event import (
     TagORM,
     GenreORM,
     VisitorCategoryORM,
-    LocationORM,
     CategoryORM,
 )
 
-from api.models.orms.push_token import PushTokenORM
+from .location import LocationORM, AccessibilityORM
+
+from .navigation import NavigationFloorORM, NavigationPointORM
+from .push_token import PushTokenORM
 from .notification import NotificationORM
+from .about import AboutORM
 
 __all__ = (
     "BaseORM",
@@ -23,4 +26,8 @@ __all__ = (
     "NotificationORM",
     "LocationORM",
     "CategoryORM",
+    "AccessibilityORM",
+    "NavigationFloorORM",
+    "NavigationPointORM",
+    "AboutORM",
 )

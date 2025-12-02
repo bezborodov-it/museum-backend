@@ -57,9 +57,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_push_token")),
-        sa.UniqueConstraint(
-            "push_token", name=op.f("uq_push_token_push_token")
-        ),
+        sa.UniqueConstraint("push_token", name=op.f("uq_push_token_push_token")),
     )
     op.create_table(
         "tag",
@@ -177,9 +175,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["push_token_id"],
             ["push_token.id"],
-            name=op.f(
-                "fk_push_token_genre_association_push_token_id_push_token"
-            ),
+            name=op.f("fk_push_token_genre_association_push_token_id_push_token"),
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint(
@@ -195,9 +191,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["push_token_id"],
             ["push_token.id"],
-            name=op.f(
-                "fk_push_token_tag_association_push_token_id_push_token"
-            ),
+            name=op.f("fk_push_token_tag_association_push_token_id_push_token"),
             ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
@@ -265,9 +259,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["exhibition_id"],
             ["exhibition.id"],
-            name=op.f(
-                "fk_exhibition_tag_association_exhibition_id_exhibition"
-            ),
+            name=op.f("fk_exhibition_tag_association_exhibition_id_exhibition"),
             ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(

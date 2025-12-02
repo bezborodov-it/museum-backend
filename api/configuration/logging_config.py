@@ -2,13 +2,14 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
+
 def setup_logging():
     logger = logging.getLogger("museum_api")
     logger.setLevel(logging.INFO)
 
     log_format = logging.Formatter(
-        fmt='[%(asctime)s.%(msecs)03d: %(levelname)s] %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        fmt="[%(asctime)s.%(msecs)03d: %(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     log_dir = os.getenv("LOG_DIR", "./logs")
@@ -34,6 +35,5 @@ def setup_logging():
     logging.getLogger("uvicorn").handlers = logger.handlers
     logging.getLogger("uvicorn.error").handlers = logger.handlers
     logging.getLogger("uvicorn.access").handlers = logger.handlers
-
 
     return logger

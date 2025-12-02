@@ -8,6 +8,9 @@ from .push_token import PushToken
 from .notification import Notification
 from .exhibition import Exhibition
 from .user import User
+from .accessibility import Accessibility
+from .about import About
+from .navigation import NavigationFloor, NavigationPoint
 
 __all__ = (
     "Event",
@@ -20,4 +23,8 @@ __all__ = (
     "Exhibition",
     "User",
     "Category",
+    "Accessibility",
+    "About",
+    "NavigationFloor",
+    "NavigationPoint",
 )

@@ -18,9 +18,8 @@ def camel_case_to_snake_case(input_str: str) -> str:
 
 
 def str_ekb_to_utc(value: str) -> datetime:
-    parsed_time = datetime.fromisoformat(value.replace('Z', ''))
+    parsed_time = datetime.fromisoformat(value.replace("Z", ""))
     yekaterinburg_tz = pytz.timezone("Asia/Yekaterinburg")
     localized_time = yekaterinburg_tz.localize(parsed_time)
 
     return localized_time.astimezone(timezone.utc)
-

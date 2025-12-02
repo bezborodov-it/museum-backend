@@ -1,10 +1,27 @@
-from fastapi import APIRouter, Depends, status, Response, Path, UploadFile, Query
+from fastapi import (
+    APIRouter,
+    Depends,
+    status,
+    Response,
+    Path,
+    UploadFile,
+    Query,
+    HTTPException,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import PositiveInt
-from typing import Optional
+from typing import Optional, List
 
 from api import schemas
-from api.cruds import Event, Exhibition
+from api.cruds import (
+    Event,
+    Exhibition,
+    Location,
+    Accessibility,
+    About,
+    NavigationFloor,
+    NavigationPoint,
+)
 from api.configuration.database.db_helper import db_helper
 from api.dependencies import get_basic_user, get_image_with
 from api.models import UserORM
@@ -241,3 +258,359 @@ async def upload_logo_by_exhibition_id(
     image_url = save_image(file)
     exhibition = await Exhibition.update_image_url(session, exhibition_id, image_url)
     return exhibition
+
+
+@site_router.post(
+    "/location",
+    tags=["location"],
+    response_model=schemas.LocationBase,
+    status_code=201,
+    responses={
+        201: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def create_location(
+    payload: schemas.LocationCreate,
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    location = await Location.create(session, payload.model_dump())
+    return location
+
+
+@site_router.post(
+    "/location/{location_id}/floor",
+    response_model=schemas.NavigationFloorBase,
+    tags=["navigation"],
+    status_code=200,
+    responses=response_codes,
+)
+async def create_navigation_floor(
+    payload: schemas.NavigationFloorCreate,
+    current_user: UserORM = Depends(get_basic_user),
+    location_id: PositiveInt = Path(..., description="The identifier of location"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    await Location.get_by_id(session, location_id)
+    existing_floor = await NavigationFloor.get_by_location_id_and_num(
+        session, location_id, payload.floor_num
+    )
+    if existing_floor:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Floor with floor_num={payload.floor_num} already exists for this location",
+        )
+
+    floor_data = {
+        "location_id": location_id,
+        "floor_num": payload.floor_num,
+    }
+    navigation_floor = await NavigationFloor.create(session, floor_data)
+    return navigation_floor
+
+
+@site_router.patch(
+    "/navigation-floor/{navigation_floor_id}",
+    response_model=schemas.NavigationFloorBase,
+    tags=["navigation"],
+    status_code=200,
+    responses=response_codes,
+)
+async def update_navigation_floor_plan(
+    payload: schemas.NavigationFloorUpdate,
+    navigation_floor_id: PositiveInt = Path(
+        ..., description="The identifier of navigation floor"
+    ),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    navigation_floor = await NavigationFloor.get_by_id(session, navigation_floor_id)
+
+    if payload.floor_num != navigation_floor.floor_num:
+        existing_floor = await NavigationFloor.get_by_location_id_and_num(
+            session, navigation_floor.location_id, payload.floor_num
+        )
+        if existing_floor:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Floor with floor_num={payload.floor_num} already exists for this location",
+            )
+
+    navigation_floor = await NavigationFloor.update(
+        session, navigation_floor_id, payload.model_dump(exclude_unset=True)
+    )
+    return navigation_floor
+
+
+@site_router.delete(
+    "/navigation-floor/{navigation_floor_id}",
+    status_code=204,
+    tags=["navigation"],
+)
+async def delete_navigation_floor(
+    navigation_floor_id: PositiveInt = Path(
+        ..., description="The identifier of navigation floor"
+    ),
+    session: AsyncSession = Depends(db_helper.session_getter),
+    current_user: UserORM = Depends(get_basic_user),
+):
+    await NavigationFloor.delete(session, navigation_floor_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@site_router.post(
+    "/navigation-floor/{navigation_floor_id}/upload-plan",
+    response_model=schemas.NavigationFloorBase,
+    tags=["navigation"],
+    status_code=200,
+    responses=response_codes,
+)
+async def upload_navigation_floor_plan(
+    file: UploadFile = Depends(get_image_with),
+    navigation_floor_id: PositiveInt = Path(
+        ..., description="The identifier of navigation floor"
+    ),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    image_url = save_image(file)
+    navigation_floor = await NavigationFloor.update(
+        session, navigation_floor_id, {"plan_image_url": image_url}
+    )
+    return navigation_floor
+
+
+@site_router.post(
+    "/navigation-floor/{navigation_floor_id}/point",
+    response_model=schemas.NavigationPointBase,
+    tags=["navigation"],
+    status_code=201,
+)
+async def create_navigation_point(
+    payload: schemas.NavigationPointCreate,
+    current_user: UserORM = Depends(get_basic_user),
+    navigation_floor_id: PositiveInt = Path(
+        ..., description="The identifier of navigation floor"
+    ),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    await NavigationFloor.get_by_id(session, navigation_floor_id)
+    point_data = {
+        "floor_id": navigation_floor_id,
+        "name": payload.name,
+        "x": payload.x,
+        "y": payload.y,
+    }
+    navigation_point = await NavigationPoint.create(session, point_data)
+    return navigation_point
+
+
+@site_router.patch(
+    "/navigation-point/{navigation_point_id}",
+    response_model=schemas.NavigationPointBase,
+    tags=["navigation"],
+    status_code=200,
+)
+async def update_navigation_point(
+    payload: schemas.NavigationPointUpdate,
+    current_user: UserORM = Depends(get_basic_user),
+    navigation_point_id: PositiveInt = Path(..., description="The identifier of navigation point"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    navigation_point = await NavigationPoint.update(
+        session, navigation_point_id, payload.model_dump(exclude_unset=True)
+    )
+    return navigation_point
+
+
+@site_router.delete(
+    "/navigation-point/{navigation_point_id}",
+    tags=["navigation"],
+    status_code=204,
+)
+async def delete_navigation_point(
+    current_user: UserORM = Depends(get_basic_user),
+    navigation_point_id: PositiveInt = Path(..., description="The identifier of navigation point"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    await NavigationPoint.delete(session, navigation_point_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@site_router.post(
+    "/accessibility",
+    tags=["accessibility"],
+    response_model=schemas.AccessibilityBase,
+    status_code=201,
+    responses={
+        201: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def create_accessibility(
+    payload: schemas.AccessibilityCreate,
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    accessibility = await Accessibility.create(session, payload.model_dump())
+    return accessibility
+
+
+@site_router.get(
+    "/accessibility/{accessibility_id}",
+    response_model=schemas.AccessibilityBase,
+    tags=["accessibility"],
+    status_code=200,
+    responses={
+        200: {"description": "Success"},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def get_accessibility_by_id(
+    accessibility_id: PositiveInt = Path(
+        ..., description="The identifier of accessibility"
+    ),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    accessibility = await Accessibility.get_by_id(session, accessibility_id)
+    return accessibility
+
+
+@site_router.delete(
+    "/accessibility/{accessibility_id}",
+    tags=["accessibility"],
+    status_code=204,
+    responses={
+        200: {"description": "Success"},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def delete_accessibility_by_id(
+    accessibility_id: PositiveInt = Path(
+        ..., description="The identifier of accessibility"
+    ),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    await Accessibility.delete(session, accessibility_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@site_router.post(
+    "/accessibility/{accessibility_id}/upload-logo",
+    status_code=200,
+    tags=["accessibility"],
+    response_model=schemas.AccessibilityBase,
+    responses={
+        200: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def upload_logo_by_accessibility_id(
+    accessibility_id: PositiveInt = Path(
+        ..., description="The identifier of accessibility"
+    ),
+    file: UploadFile = Depends(get_image_with),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    image_url = save_image(file)
+    accessibility = await Accessibility.update(
+        session, accessibility_id, {"image_url": image_url}
+    )
+    return accessibility
+
+
+@site_router.patch(
+    "/location/{location_id}",
+    response_model=schemas.LocationBase,
+    tags=["location"],
+    status_code=200,
+    responses={
+        200: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def update_location_by_id(
+    pyload: schemas.LocationUpdate,
+    location_id: PositiveInt = Path(..., description="The identifier of location"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    location = await Location.update(
+        session, location_id, pyload.model_dump(exclude_unset=True)
+    )
+    return location
+
+
+@site_router.delete(
+    "/location/{location_id}",
+    tags=["location"],
+    status_code=204,
+    responses={
+        200: {"description": "Success"},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def delete_location_by_id(
+    location_id: PositiveInt = Path(..., description="The identifier of location"),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    await Location.delete(session, location_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@site_router.post(
+    "/location/{location_id}/upload-image",
+    status_code=200,
+    tags=["location"],
+    response_model=schemas.LocationBase,
+    responses={
+        200: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def upload_image_by_location_id(
+    location_id: PositiveInt = Path(..., description="The identifier of location"),
+    file: UploadFile = Depends(get_image_with),
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    image_url = save_image(file)
+    location = await Location.update(session, location_id, {"image_url": image_url})
+    return location
+
+
+@site_router.patch(
+    "/about",
+    tags=["about"],
+    response_model=schemas.AboutBase,
+    status_code=200,
+    responses={
+        200: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def update_about(
+    payload: schemas.AboutUpdate,
+    current_user: UserORM = Depends(get_basic_user),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    about = await About.update_one(session, payload.model_dump(exclude_unset=True))
+    return about

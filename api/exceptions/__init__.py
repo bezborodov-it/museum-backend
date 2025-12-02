@@ -27,7 +27,7 @@ def init_exception_handlers(app: FastAPI):
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
-            request: Request, exc: RequestValidationError
+        request: Request, exc: RequestValidationError
     ):
         return JSONResponse(
             status_code=422,
@@ -36,7 +36,7 @@ def init_exception_handlers(app: FastAPI):
 
     @app.exception_handler(ResponseValidationError)
     async def validation_exception_handler(
-            request: Request, exc: ResponseValidationError
+        request: Request, exc: ResponseValidationError
     ):
         return JSONResponse(
             status_code=422,
@@ -62,14 +62,14 @@ def init_exception_handlers(app: FastAPI):
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
-            request: Request, exc: RequestValidationError
+        request: Request, exc: RequestValidationError
     ):
         error_details = []
         for error in exc.errors():
             error_detail = {
                 "loc": error["loc"],
                 "msg": error["msg"],
-                "type": error["type"]
+                "type": error["type"],
             }
             if "input" in error:
                 error_detail["input"] = error["input"]

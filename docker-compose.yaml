@@ -28,7 +28,7 @@ services:
       - museum
 
   redis:
-    image: redis
+    image: redis:8
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]

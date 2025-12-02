@@ -10,6 +10,10 @@ from .orms import (
     PushTokenORM,
     NotificationORM,
     CategoryORM,
+    AccessibilityORM,
+    AboutORM,
+    NavigationFloorORM,
+    NavigationPointORM,
 )
 
 __all__ = (
@@ -28,4 +32,8 @@ __all__ = (
     # notification
     "PushTokenORM",
     "NotificationORM",
+    "AccessibilityORM",
+    "AboutORM",
+    "NavigationFloorORM",
+    "NavigationPointORM",
 )

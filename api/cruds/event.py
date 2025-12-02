@@ -1,6 +1,6 @@
 from sqlalchemy import select, func, or_
 from typing import List
-from datetime import  datetime, timedelta
+from datetime import datetime, timedelta
 from api.cruds.base import Base, with_model
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.models import (
@@ -10,7 +10,6 @@ from api.models import (
     TagORM,
     GenreORM,
 )
-
 
 
 @with_model(EventORM)
@@ -39,7 +38,9 @@ class Event(Base):
         limit: int = 10,
     ) -> List[EventORM]:
         query = select(cls.model)
-        query = query.filter(cls.model.date_start >= datetime.now() + timedelta(hours=5))
+        query = query.filter(
+            cls.model.date_start >= datetime.now() + timedelta(hours=5)
+        )
 
         if genre_ids:
             query = query.filter(cls.model.genre_id.in_(genre_ids))
@@ -48,7 +49,9 @@ class Event(Base):
             query = query.filter(cls.model.location_id.in_(location_ids))
 
         if visitor_category_ids:
-            query = query.filter(cls.model.visitor_category_id.in_(visitor_category_ids))
+            query = query.filter(
+                cls.model.visitor_category_id.in_(visitor_category_ids)
+            )
 
         if category_ids:
             query = query.filter(cls.model.category_id.in_(category_ids))
@@ -70,7 +73,7 @@ class Event(Base):
             cls.model.pinned_order.is_(None),
             cls.model.pinned_order.asc(),
             func.min(cls.model.date_start).asc(),
-            cls.model.id.asc()
+            cls.model.id.asc(),
         )
 
         total_count = await session.scalar(
@@ -98,7 +101,9 @@ class Event(Base):
         tags = [t.id for t in push_token_obj.tags] if push_token_obj.tags else None
 
         query = select(cls.model)
-        query = query.filter(cls.model.date_start >= datetime.now() + timedelta(hours=5))
+        query = query.filter(
+            cls.model.date_start >= datetime.now() + timedelta(hours=5)
+        )
 
         if tags:
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))

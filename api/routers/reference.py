@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from api import schemas
-from api.cruds import Genre, Tag, VisitorCategory, Location, Category
+from api.cruds import Genre, Tag, VisitorCategory, Category, About
 from api.configuration.database.db_helper import db_helper
 from api.models import UserORM
 from api.dependencies import get_basic_user
@@ -69,58 +69,6 @@ async def delete_visitor_category_by_id(
     current_user: UserORM = Depends(get_basic_user),
 ) -> Response:
     await VisitorCategory.delete(session, visitor_category_id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@site_router.post(
-    "/location",
-    tags=["admin"],
-    response_model=schemas.LocationBase,
-    status_code=201,
-    responses={
-        201: {"description": "Success"},
-        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def create_location(
-    payload: schemas.LocationCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    location = await Location.create(session, payload.model_dump())
-    return location
-
-
-@site_router.get(
-    "/locations",
-    response_model=List[schemas.LocationBase],
-    status_code=200,
-    responses=response_codes,
-)
-async def get_location_list(
-    session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    return await Location.get_all(session)
-
-
-@site_router.delete(
-    "/location/{location_id}",
-    tags=["admin"],
-    status_code=204,
-    responses={
-        200: {"description": "Success"},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def delete_location_by_id(
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    await Location.delete(session, location_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -207,6 +155,25 @@ async def get_tag_list(
     session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     return await Tag.get_all(session)
+
+
+@site_router.get(
+    "/about",
+    tags=["admin", "about"],
+    response_model=schemas.AboutBase,
+    status_code=200,
+    responses={
+        200: {"description": "Success"},
+        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
+        404: {"description": "Not found", "model": schemas.ErrorNotFound},
+        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
+    },
+)
+async def get_about(
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> Response:
+    about = await About.get_one(session)
+    return about
 
 
 @site_router.delete(

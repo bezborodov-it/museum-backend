@@ -17,7 +17,8 @@ from api.models.associations import (
     push_token_genre_association,
     push_token_tag_association,
     event_tag_association,
-    exhibition_tag_association, push_token_visitor_category_association,
+    exhibition_tag_association,
+    push_token_visitor_category_association,
 )
 
 
@@ -211,26 +212,6 @@ class TagORM(BaseORM):
         "PushTokenORM",
         secondary=push_token_tag_association,
         back_populates="tags",
-        lazy="selectin",
-    )
-
-    def __repr__(self) -> str:
-        return f"<{self.__tablename__} {self.id} {self.name}>"
-
-
-class LocationORM(BaseORM):
-    id = Column(BigInteger, primary_key=True)
-    name = Column(String, nullable=False)
-    address = Column(String, nullable=False)
-
-    events = relationship(
-        "EventORM",
-        back_populates="location",
-        lazy="selectin",
-    )
-    exhibitions = relationship(
-        "ExhibitionORM",
-        back_populates="location",
         lazy="selectin",
     )
 

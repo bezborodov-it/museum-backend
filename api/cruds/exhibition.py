@@ -1,6 +1,6 @@
 from sqlalchemy import select, or_, func, case
 from typing import List, Tuple
-from datetime import  datetime, timedelta
+from datetime import datetime, timedelta
 
 from api.cruds.base import Base, with_model
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,7 +49,9 @@ class Exhibition(Base):
             query = query.filter(cls.model.location_id.in_(location_ids))
 
         if visitor_category_ids:
-            query = query.filter(cls.model.visitor_category_id.in_(visitor_category_ids))
+            query = query.filter(
+                cls.model.visitor_category_id.in_(visitor_category_ids)
+            )
 
         if category_ids:
             query = query.filter(cls.model.category_id.in_(category_ids))
@@ -74,7 +76,7 @@ class Exhibition(Base):
             cls.model.pinned_order.is_(None),
             cls.model.pinned_order.asc(),
             func.min(cls.model.date_start).asc(),
-            cls.model.id.asc()
+            cls.model.id.asc(),
         )
 
         total_count = await session.scalar(
