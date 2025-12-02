@@ -26,11 +26,12 @@ class NavigationFloorORM(BaseORM, DateORMMixin):
 class NavigationPointORM(BaseORM, DateORMMixin):
     id = Column(BigInteger, primary_key=True)
     floor_id = Column(BigInteger, ForeignKey("navigation_floor.id"), nullable=False)
-    name = Column(String, nullable=False)
+    number = Column(Integer, nullable=False)
+    title = Column(String, nullable=False)
     x = Column(Float, nullable=False)
     y = Column(Float, nullable=False)
 
     floor = relationship("NavigationFloorORM", back_populates="points")
 
     def __repr__(self) -> str:
-        return f"<{self.__tablename__} {self.id} {self.name}>"
+        return f"<{self.__tablename__} {self.id} {self.title}>"
