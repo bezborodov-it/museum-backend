@@ -398,7 +398,8 @@ async def create_navigation_point(
     await NavigationFloor.get_by_id(session, navigation_floor_id)
     point_data = {
         "floor_id": navigation_floor_id,
-        "name": payload.name,
+        "title": payload.title,
+        "number": payload.number,
         "x": payload.x,
         "y": payload.y,
     }
