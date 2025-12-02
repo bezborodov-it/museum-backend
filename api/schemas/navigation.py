@@ -32,7 +32,7 @@ class NavigationFloorBase(BaseModel):
     floor_num: int
     plan_image_url: Optional[str] = None
 
-    points: Optional[List[NavigationPointBase]] = []
+    points: List[NavigationPointBase] = []
 
     class Config:
         from_attributes = True

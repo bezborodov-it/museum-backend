@@ -29,7 +29,7 @@ class LocationBase(BaseModel):
     is_active: bool
 
     accessibilities: List[AccessibilityBase]
-    floors: Optional[List[NavigationFloorBase]] = []
+    floors: List[NavigationFloorBase] = []
 
     class Config:
         from_attributes = True
