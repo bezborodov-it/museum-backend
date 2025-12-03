@@ -23,6 +23,7 @@ class LocationBase(BaseModel):
     image_url: Optional[str] = None
     description: Optional[str] = None
     working_hours: Optional[str] = None
+    working_days: Optional[str] = None
     address: str
     phones: Optional[str] = None
     about: Optional[str] = None
@@ -39,7 +40,7 @@ class LocationShallow(BaseModel):
     id: int
     name: str
     address: str
-    working_hours: Optional[str] = None
+    working_days: Optional[str] = None
     image_url: Optional[str] = None
     is_active: bool
 
