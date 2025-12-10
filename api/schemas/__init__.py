@@ -55,6 +55,15 @@ from .navigation import (
     NavigationFloorUpdate,
 )
 
+from .inclusive_story import (
+    StoryCreate,
+    StoryUpdate,
+    StoryBase,
+    InclusiveStoryBase,
+    InclusiveStoryCreate,
+    InclusiveStoryUpdate
+)
+
 __all__ = (
     "EventBase",
     "EventCreate",
@@ -99,4 +108,10 @@ __all__ = (
     "NavigationFloorBase",
     "NavigationFloorCreate",
     "NavigationFloorUpdate",
+    "StoryCreate",
+    "StoryUpdate",
+    "StoryBase",
+    "InclusiveStoryBase",
+    "InclusiveStoryCreate",
+    "InclusiveStoryUpdate"
 )

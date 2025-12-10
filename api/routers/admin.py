@@ -21,6 +21,8 @@ from api.cruds import (
     About,
     NavigationFloor,
     NavigationPoint,
+    InclusiveStory,
+    Story
 )
 from api.configuration.database.db_helper import db_helper
 from api.dependencies import get_basic_user, get_image_with
@@ -436,6 +438,132 @@ async def delete_navigation_point(
     session: AsyncSession = Depends(db_helper.session_getter),
 ):
     await NavigationPoint.delete(session, navigation_point_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@site_router.post(
+    "/location/{location_id}/inclusive-story",
+    response_model=schemas.InclusiveStoryBase,
+    tags=["inclusive"],
+    status_code=200,
+    responses=response_codes,
+)
+async def create_inclusive_story(
+    payload: schemas.InclusiveStoryCreate,
+    current_user: UserORM = Depends(get_basic_user),
+    location_id: PositiveInt = Path(..., description="The identifier of location"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    await Location.get_by_id(session, location_id)
+
+    inclusive_story_data = {
+        "location_id": location_id,
+        "title": payload.title,
+    }
+    inclusive_story = await InclusiveStory.create(session, inclusive_story_data)
+    return inclusive_story
+
+
+@site_router.patch(
+    "/inclusive-story/{inclusive_story_id}",
+    response_model=schemas.InclusiveStoryBase,
+    tags=["inclusive"],
+    status_code=200,
+    responses=response_codes,
+)
+async def update_inclusive_story(
+    payload: schemas.InclusiveStoryUpdate,
+    inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+
+    inclusive_story = await InclusiveStory.update(
+        session, inclusive_story_id, payload.model_dump(exclude_unset=True)
+    )
+    return inclusive_story
+
+
+@site_router.delete(
+    "/inclusive-story/{inclusive_story_id}",
+    status_code=204,
+    tags=["inclusive"],
+)
+async def delete_inclusive_story(
+    inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+    current_user: UserORM = Depends(get_basic_user),
+):
+    await InclusiveStory.delete(session, inclusive_story_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@site_router.post(
+    "/inclusive-story/{inclusive_story_id}/story",
+    response_model=schemas.StoryBase,
+    tags=["inclusive"],
+    status_code=201,
+)
+async def create_story(
+    payload: schemas.StoryCreate,
+    current_user: UserORM = Depends(get_basic_user),
+    inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    await InclusiveStory.get_by_id(session, inclusive_story_id)
+    story_data = {
+        "inclusive_story_id": inclusive_story_id,
+        "order": payload.order,
+        "content": payload.content,
+    }
+    story = await Story.create(session, story_data)
+    return story
+
+@site_router.post(
+    "/story/{story_id}",
+    response_model=schemas.StoryBase,
+    tags=["inclusive"],
+    status_code=200,
+    responses=response_codes,
+)
+async def upload_story_image(
+    file: UploadFile = Depends(get_image_with),
+    story_id: PositiveInt = Path(..., description="The identifier of story"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    image_url = save_image(file)
+    story = await Story.update(
+        session, story_id, {"story_image_url": image_url}
+    )
+    return story
+
+@site_router.patch(
+    "/story/{story_id}",
+    response_model=schemas.StoryBase,
+    tags=["inclusive"],
+    status_code=200,
+)
+async def update_story(
+    payload: schemas.StoryUpdate,
+    current_user: UserORM = Depends(get_basic_user),
+    story_id: PositiveInt = Path(..., description="The identifier of story"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    story = await Story.update(
+        session, story_id, payload.model_dump(exclude_unset=True)
+    )
+    return story
+
+
+@site_router.delete(
+    "/story/{story_id}",
+    tags=["inclusive"],
+    status_code=204,
+)
+async def delete_story(
+    current_user: UserORM = Depends(get_basic_user),
+    story_id: PositiveInt = Path(..., description="The identifier of story"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    await Story.delete(session, story_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
