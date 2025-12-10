@@ -14,6 +14,7 @@ from .navigation import NavigationFloorORM, NavigationPointORM
 from .push_token import PushTokenORM
 from .notification import NotificationORM
 from .about import AboutORM
+from .inclusive_story import InclusiveStoryORM, StoryORM
 
 __all__ = (
     "BaseORM",
@@ -30,4 +31,6 @@ __all__ = (
     "NavigationFloorORM",
     "NavigationPointORM",
     "AboutORM",
+    "InclusiveStoryORM",
+    "StoryORM",
 )

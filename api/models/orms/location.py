@@ -49,6 +49,12 @@ class LocationORM(BaseORM):
         cascade="all, delete-orphan",
         order_by="NavigationFloorORM.floor_num"
     )
+    inclusive_story = relationship(
+        "InclusiveStoryORM",
+        back_populates="location",
+        lazy="selectin",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self) -> str:
         return f"<{self.__tablename__} {self.id} {self.name}>"

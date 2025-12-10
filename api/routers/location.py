@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from api import schemas
-from api.cruds import Location, Accessibility, NavigationFloor
+from api.cruds import Location, Accessibility, NavigationFloor, InclusiveStory
 from api.configuration.database.db_helper import db_helper
 
 site_router = APIRouter(tags=["location"])
@@ -68,6 +68,21 @@ async def get_navigation_floors(
 
     floors = await NavigationFloor.get_by_location_id(session, location_id)
     return floors
+
+@site_router.get(
+    "/location/{location_id}/inclusive-stories",
+    response_model=List[schemas.InclusiveStoryBase],
+    tags=["inclusive"],
+    status_code=200,
+)
+async def get_inclusive_stories(
+    location_id: PositiveInt = Path(..., description="The identifier of location"),
+    session: AsyncSession = Depends(db_helper.session_getter),
+) -> List[schemas.NavigationFloorBase]:
+    await Location.get_by_id(session, location_id)
+
+    inclusive_stories = await InclusiveStory.get_by_location_id(session, location_id)
+    return inclusive_stories
 
 
 @site_router.get(

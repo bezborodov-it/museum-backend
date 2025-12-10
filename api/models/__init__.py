@@ -14,6 +14,8 @@ from .orms import (
     AboutORM,
     NavigationFloorORM,
     NavigationPointORM,
+    InclusiveStoryORM,
+    StoryORM
 )
 
 __all__ = (
@@ -36,4 +38,6 @@ __all__ = (
     "AboutORM",
     "NavigationFloorORM",
     "NavigationPointORM",
+    "InclusiveStoryORM",
+    "StoryORM",
 )

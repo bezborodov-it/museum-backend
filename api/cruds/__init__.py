@@ -11,6 +11,7 @@ from .user import User
 from .accessibility import Accessibility
 from .about import About
 from .navigation import NavigationFloor, NavigationPoint
+from .inclusive_story import InclusiveStory, Story
 
 __all__ = (
     "Event",
@@ -27,4 +28,6 @@ __all__ = (
     "About",
     "NavigationFloor",
     "NavigationPoint",
+    "InclusiveStory",
+    "Story"
 )
