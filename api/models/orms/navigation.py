@@ -27,7 +27,7 @@ class NavigationFloorORM(BaseORM, DateORMMixin):
 class NavigationPointORM(BaseORM, DateORMMixin):
     id = Column(BigInteger, primary_key=True)
     floor_id = Column(BigInteger, ForeignKey("navigation_floor.id"), nullable=False)
-    number = Column(Integer, nullable=False)
+    number = Column(Float, nullable=False)
     title = Column(String, nullable=False)
     x = Column(Float, nullable=False)
     y = Column(Float, nullable=False)

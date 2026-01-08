@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class NavigationPointBase(BaseModel):
     id: int
-    number: int
+    number: float
     title: str
     x: float
     y: float
@@ -14,14 +14,14 @@ class NavigationPointBase(BaseModel):
 
 
 class NavigationPointCreate(BaseModel):
-    number: int
+    number: float
     title: str
     x: float
     y: float
 
 
 class NavigationPointUpdate(BaseModel):
-    number: Optional[int] = None
+    number: Optional[float] = None
     title: Optional[str] = None
     x: Optional[float] = None
     y: Optional[float] = None
