@@ -2,7 +2,7 @@ from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel
 
-from .location import LocationBase
+from .location import LocationShallow
 
 
 class VisitorCategoryCreate(BaseModel):
@@ -62,7 +62,7 @@ class EventBase(BaseModel):
     pushkin_card: bool
     min_price: Optional[int]
     payment_url: Optional[str]
-    location: LocationBase
+    location: LocationShallow
     visitor_category: VisitorCategoryBase
     genre: GenreBase
     category: Optional[CategoryBase]
@@ -84,7 +84,7 @@ class ShallowEvent(BaseModel):
     is_free: bool
     privilege_ticket: bool
     pushkin_card: bool
-    location: LocationBase
+    location: LocationShallow
     visitor_category: VisitorCategoryBase
     category: Optional[CategoryBase]
 
@@ -181,7 +181,7 @@ class ExhibitionBase(BaseModel):
     pushkin_card: bool
     payment_url: Optional[str]
 
-    location: LocationBase
+    location: LocationShallow
     visitor_category: VisitorCategoryBase
     category: Optional[CategoryBase]
 
@@ -205,7 +205,7 @@ class ShallowExhibition(BaseModel):
     privilege_ticket: bool
     pushkin_card: bool
 
-    location: LocationBase
+    location: LocationShallow
     visitor_category: VisitorCategoryBase
     category: Optional[CategoryBase]
 
