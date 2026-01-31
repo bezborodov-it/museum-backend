@@ -90,7 +90,6 @@ async def get_event_by_id(
     },
 )
 async def get_exhibitions(
-    genre: List[int] = Query(None, description="Genre"),
     location: List[int] = Query(None, description="Location"),
     visitor_category: List[int] = Query(None, description="Visitor category"),
     category: List[int] = Query(None, description="Category"),
@@ -105,7 +104,6 @@ async def get_exhibitions(
 ) -> Response:
     exhibitions, total_count = await Exhibition.filter(
         session,
-        genre,
         location,
         visitor_category,
         category,

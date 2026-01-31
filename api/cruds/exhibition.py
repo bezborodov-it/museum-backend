@@ -27,7 +27,6 @@ class Exhibition(Base):
     async def filter(
         cls,
         session: AsyncSession,
-        genre_ids: List[int] = None,
         location_ids: List[int] = None,
         visitor_category_ids: List[int] = None,
         category_ids: List[int] = None,
@@ -41,9 +40,6 @@ class Exhibition(Base):
     ) -> List[ExhibitionORM]:
         query = select(cls.model)
         query = query.filter(cls.model.date_end >= datetime.now() + timedelta(hours=5))
-
-        if genre_ids:
-            query = query.filter(cls.model.genre_id.in_(genre_ids))
 
         if location_ids:
             query = query.filter(cls.model.location_id.in_(location_ids))
