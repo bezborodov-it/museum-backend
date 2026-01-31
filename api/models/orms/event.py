@@ -106,12 +106,6 @@ class ExhibitionORM(BaseORM, DateORMMixin):
         lazy="selectin",
     )
 
-    genre = relationship(
-        "GenreORM",
-        back_populates="exhibitions",
-        lazy="selectin",
-    )
-
     location = relationship(
         "LocationORM",
         back_populates="exhibitions",
@@ -168,12 +162,6 @@ class GenreORM(BaseORM):
 
     events = relationship(
         "EventORM",
-        back_populates="genre",
-        lazy="selectin",
-    )
-
-    exhibitions = relationship(
-        "ExhibitionORM",
         back_populates="genre",
         lazy="selectin",
     )
