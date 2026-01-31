@@ -183,7 +183,6 @@ class ExhibitionBase(BaseModel):
 
     location: LocationBase
     visitor_category: VisitorCategoryBase
-    genre: GenreBase
     category: Optional[CategoryBase]
 
     tags: List[TagBase]
@@ -233,7 +232,6 @@ class ExhibitionCreate(BaseModel):
     pushkin_card: bool
     min_price: Optional[int] = None
     location_id: Optional[int] = None
-    genre_id: Optional[int] = None
     visitor_category_id: int
     category_id: Optional[int] = None
 
@@ -254,7 +252,6 @@ class ExhibitionUpdate(BaseModel):
     pushkin_card: Optional[bool] = None
     min_price: Optional[int] = None
     location_id: Optional[int] = None
-    genre_id: Optional[int] = None
     visitor_category_id: Optional[int] = []
     category_id: Optional[int] = None
 

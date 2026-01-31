@@ -95,7 +95,6 @@ class ExhibitionORM(BaseORM, DateORMMixin):
     pinned_order = Column(SmallInteger, nullable=True, default=None)
 
     location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
-    genre_id = Column(BigInteger, ForeignKey("genre.id"), nullable=False)
     visitor_category_id = Column(
         BigInteger, ForeignKey("visitor_category.id"), nullable=False
     )
