@@ -41,21 +41,6 @@ push_token_tag_association = Table(
     Column("tag_id", ForeignKey("tag.id", ondelete="CASCADE"), primary_key=True),
 )
 
-push_token_visitor_category_association = Table(
-    "push_token_visitor_category_association",
-    BaseORM.metadata,
-    Column(
-        "push_token_id",
-        ForeignKey("push_token.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    Column(
-        "visitor_category_id",
-        ForeignKey("visitor_category.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-)
-
 location_accessibility = Table(
     "location_accessibility",
     BaseORM.metadata,

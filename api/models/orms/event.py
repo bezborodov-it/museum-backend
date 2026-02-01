@@ -8,9 +8,11 @@ from sqlalchemy import (
     Text,
     Integer,
     SmallInteger,
+    Enum
 )
 from sqlalchemy.orm import relationship
 
+from api.models.enum import AgeEnum
 from api.models.mixin.date import DateORMMixin
 from api.models.orms.base import BaseORM
 from api.models.associations import (
@@ -18,7 +20,6 @@ from api.models.associations import (
     push_token_tag_association,
     event_tag_association,
     exhibition_tag_association,
-    push_token_visitor_category_association,
 )
 
 
@@ -35,19 +36,12 @@ class EventORM(BaseORM, DateORMMixin):
     pushkin_card = Column(Boolean, nullable=False)
     min_price = Column(Integer, nullable=True)
     pinned_order = Column(SmallInteger, nullable=True, default=None)
+    age = Column(Enum(AgeEnum), nullable=False, default=AgeEnum.ZERO_PLUS)
 
     location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
     genre_id = Column(BigInteger, ForeignKey("genre.id"), nullable=False)
-    visitor_category_id = Column(
-        BigInteger, ForeignKey("visitor_category.id"), nullable=False
-    )
-    category_id = Column(BigInteger, ForeignKey("category.id"), nullable=True)
 
-    visitor_category = relationship(
-        "VisitorCategoryORM",
-        back_populates="events",
-        lazy="selectin",
-    )
+    category_id = Column(BigInteger, ForeignKey("category.id"), nullable=True)
 
     genre = relationship(
         "GenreORM",
@@ -93,18 +87,10 @@ class ExhibitionORM(BaseORM, DateORMMixin):
     pushkin_card = Column(Boolean, nullable=False)
     audio_guide = Column(Boolean, nullable=False)
     pinned_order = Column(SmallInteger, nullable=True, default=None)
+    age = Column(Enum(AgeEnum), nullable=False, default=AgeEnum.ZERO_PLUS.value)
 
     location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
-    visitor_category_id = Column(
-        BigInteger, ForeignKey("visitor_category.id"), nullable=False
-    )
     category_id = Column(BigInteger, ForeignKey("category.id"), nullable=True)
-
-    visitor_category = relationship(
-        "VisitorCategoryORM",
-        back_populates="exhibitions",
-        lazy="selectin",
-    )
 
     location = relationship(
         "LocationORM",
@@ -122,33 +108,6 @@ class ExhibitionORM(BaseORM, DateORMMixin):
     category = relationship(
         "CategoryORM",
         back_populates="exhibitions",
-        lazy="selectin",
-    )
-
-    def __repr__(self) -> str:
-        return f"<{self.__tablename__} {self.id} {self.name}>"
-
-
-class VisitorCategoryORM(BaseORM):
-    id = Column(BigInteger, primary_key=True)
-    name = Column(String, nullable=False)
-
-    events = relationship(
-        "EventORM",
-        back_populates="visitor_category",
-        lazy="selectin",
-    )
-
-    exhibitions = relationship(
-        "ExhibitionORM",
-        back_populates="visitor_category",
-        lazy="selectin",
-    )
-
-    push_tokens = relationship(
-        "PushTokenORM",
-        secondary=push_token_visitor_category_association,
-        back_populates="visitor_categories",
         lazy="selectin",
     )
 

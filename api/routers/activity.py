@@ -16,6 +16,7 @@ from api.cruds import (
     PushToken,
 )
 from api.configuration.database.db_helper import db_helper
+from api.models.enum import AgeEnum
 
 site_router = APIRouter(prefix="/activity", tags=["activity"])
 
@@ -39,8 +40,8 @@ response_codes = {
 async def get_events(
     genre_ids: List[int] = Query(None, description="Genre"),
     location_ids: List[int] = Query(None, description="Location"),
-    visitor_category_ids: List[int] = Query(None, description="Visitor category"),
     category_ids: List[int] = Query(None, description="Category"),
+    age: List[AgeEnum] = Query(None, description="Age"),
     disabilities: bool = Query(None, description="Disabilities"),
     is_free: bool = Query(None, description="Is free"),
     privilege_ticket: bool = Query(None, description="Privilege ticket"),
@@ -53,8 +54,8 @@ async def get_events(
         session,
         genre_ids,
         location_ids,
-        visitor_category_ids,
         category_ids,
+        age,
         disabilities,
         is_free,
         privilege_ticket,
@@ -91,8 +92,8 @@ async def get_event_by_id(
 )
 async def get_exhibitions(
     location: List[int] = Query(None, description="Location"),
-    visitor_category: List[int] = Query(None, description="Visitor category"),
     category: List[int] = Query(None, description="Category"),
+    age: List[AgeEnum] = Query(None, description="Age"),
     disabilities: bool = Query(None, description="Disabilities"),
     is_free: bool = Query(None, description="Is free"),
     privilege_ticket: bool = Query(None, description="Privilege ticket"),
@@ -105,8 +106,8 @@ async def get_exhibitions(
     exhibitions, total_count = await Exhibition.filter(
         session,
         location,
-        visitor_category,
         category,
+        age,
         disabilities,
         is_free,
         privilege_ticket,
@@ -147,7 +148,6 @@ async def create_preference(
         payload.push_token,
         payload.tags,
         payload.genres,
-        payload.visitor_categories,
     )
 
     events = await Event.get_by_preferences(session, push_token_obj)
