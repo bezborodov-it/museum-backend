@@ -4,10 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from api import schemas
-from api.cruds import Genre, Tag, VisitorCategory, Category, About
+from api.cruds import Genre, Tag, Category, About
 from api.configuration.database.db_helper import db_helper
 from api.models import UserORM
 from api.dependencies import get_basic_user
+from api.models.enum import AgeEnum
 
 site_router = APIRouter(prefix="/reference", tags=["reference"])
 
@@ -18,58 +19,9 @@ response_codes = {
 }
 
 
-@site_router.get(
-    "/visitor_categories",
-    response_model=List[schemas.VisitorCategoryBase],
-    status_code=200,
-    responses=response_codes,
-)
-async def get_visitor_category_list(
-    session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    return await VisitorCategory.get_all(session)
-
-
-@site_router.post(
-    "/visitor_category",
-    tags=["admin"],
-    response_model=schemas.VisitorCategoryBase,
-    status_code=201,
-    responses={
-        201: {"description": "Success"},
-        400: {"description": "Bad Request", "model": schemas.ErrorGeneral},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def create_visitor_category(
-    payload: schemas.VisitorCategoryCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
-) -> Response:
-    visitor_category = await VisitorCategory.create(session, payload.model_dump())
-    return visitor_category
-
-
-@site_router.delete(
-    "/visitor_category/{visitor_category_id}",
-    tags=["admin"],
-    status_code=204,
-    responses={
-        200: {"description": "Success"},
-        404: {"description": "Not found", "model": schemas.ErrorNotFound},
-        500: {"description": "Internal server error", "model": schemas.ErrorGeneral},
-    },
-)
-async def delete_visitor_category_by_id(
-    visitor_category_id: PositiveInt = Path(
-        ..., description="The identifier of visitor category"
-    ),
-    session: AsyncSession = Depends(db_helper.session_getter),
-    current_user: UserORM = Depends(get_basic_user),
-) -> Response:
-    await VisitorCategory.delete(session, visitor_category_id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@site_router.get("/age", response_model=dict[str, str])
+async def get_age_list():
+    return {age.name: age.display_name for age in AgeEnum}
 
 
 @site_router.post(

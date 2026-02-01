@@ -29,7 +29,6 @@ class PushToken(Base):
         push_token: str,
         tag_ids: List[int],
         genre_ids: List[int],
-        visitor_category_ids: List[int],
     ) -> PushTokenORM:
 
         push_token_obj = await cls.get_by_token(session, push_token)
@@ -40,7 +39,6 @@ class PushToken(Base):
         data = {
             "tags": tag_ids,
             "genres": genre_ids,
-            "visitor_categories": visitor_category_ids,
         }
 
         if data:

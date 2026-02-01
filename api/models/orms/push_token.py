@@ -6,7 +6,6 @@ from api.models.orms.base import BaseORM
 from api.models.associations import (
     push_token_genre_association,
     push_token_tag_association,
-    push_token_visitor_category_association,
 )
 
 
@@ -24,13 +23,6 @@ class PushTokenORM(BaseORM, DateORMMixin):
     tags = relationship(
         "TagORM",
         secondary=push_token_tag_association,
-        back_populates="push_tokens",
-        lazy="selectin",
-    )
-
-    visitor_categories = relationship(
-        "VisitorCategoryORM",
-        secondary=push_token_visitor_category_association,
         back_populates="push_tokens",
         lazy="selectin",
     )

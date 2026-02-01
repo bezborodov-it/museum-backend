@@ -1,20 +1,9 @@
 from typing import Optional, List
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 
-from .location import LocationBase
-
-
-class VisitorCategoryCreate(BaseModel):
-    name: str
-
-
-class VisitorCategoryBase(BaseModel):
-    id: int
-    name: str
-
-    class Config:
-        from_attributes = True
+from .location import LocationShallow
+from ..models.enum import AgeEnum
 
 
 class CategoryBase(BaseModel):
@@ -62,8 +51,8 @@ class EventBase(BaseModel):
     pushkin_card: bool
     min_price: Optional[int]
     payment_url: Optional[str]
-    location: LocationBase
-    visitor_category: VisitorCategoryBase
+    location: LocationShallow
+    age: AgeEnum
     genre: GenreBase
     category: Optional[CategoryBase]
 
@@ -71,6 +60,10 @@ class EventBase(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @field_serializer("age")
+    def serialize_age(self, age: AgeEnum):
+        return age.display_name
 
 
 class ShallowEvent(BaseModel):
@@ -84,12 +77,16 @@ class ShallowEvent(BaseModel):
     is_free: bool
     privilege_ticket: bool
     pushkin_card: bool
-    location: LocationBase
-    visitor_category: VisitorCategoryBase
+    location: LocationShallow
+    age: AgeEnum
     category: Optional[CategoryBase]
 
     class Config:
         from_attributes = True
+
+    @field_serializer("age")
+    def serialize_age(self, age: AgeEnum):
+        return age.display_name
 
 
 class ShallowAdminEvent(BaseModel):
@@ -118,7 +115,7 @@ class EventCreate(BaseModel):
     min_price: Optional[int] = None
     location_id: Optional[int] = None
     genre_id: Optional[int] = None
-    visitor_category_id: int
+    age: AgeEnum
     category_id: Optional[int] = None
 
     tags: List[int]
@@ -137,7 +134,7 @@ class EventUpdate(BaseModel):
     min_price: Optional[int] = None
     location_id: Optional[int] = None
     genre_id: Optional[int] = None
-    visitor_category_id: Optional[int] = None
+    age: Optional[AgeEnum] = None
     category_id: Optional[int] = None
 
     tags: Optional[List[int]] = []
@@ -181,14 +178,18 @@ class ExhibitionBase(BaseModel):
     pushkin_card: bool
     payment_url: Optional[str]
 
-    location: LocationBase
-    visitor_category: VisitorCategoryBase
+    location: LocationShallow
+    age: AgeEnum
     category: Optional[CategoryBase]
 
     tags: List[TagBase]
 
     class Config:
         from_attributes = True
+
+    @field_serializer("age")
+    def serialize_age(self, age: AgeEnum):
+        return age.display_name
 
 
 class ShallowExhibition(BaseModel):
@@ -205,12 +206,16 @@ class ShallowExhibition(BaseModel):
     privilege_ticket: bool
     pushkin_card: bool
 
-    location: LocationBase
-    visitor_category: VisitorCategoryBase
+    location: LocationShallow
+    age: AgeEnum
     category: Optional[CategoryBase]
 
     class Config:
         from_attributes = True
+
+    @field_serializer("age")
+    def serialize_age(self, age: AgeEnum):
+        return age.display_name
 
 
 class ExhibitionFilterGet(BaseModel):
@@ -232,7 +237,7 @@ class ExhibitionCreate(BaseModel):
     pushkin_card: bool
     min_price: Optional[int] = None
     location_id: Optional[int] = None
-    visitor_category_id: int
+    age: AgeEnum
     category_id: Optional[int] = None
 
     tags: List[int]
@@ -252,7 +257,7 @@ class ExhibitionUpdate(BaseModel):
     pushkin_card: Optional[bool] = None
     min_price: Optional[int] = None
     location_id: Optional[int] = None
-    visitor_category_id: Optional[int] = []
+    age: Optional[AgeEnum] = None
     category_id: Optional[int] = None
 
     tags: Optional[List[int]] = []
@@ -275,7 +280,6 @@ class ActivityPreferencesCreate(BaseModel):
     push_token: str
     tags: List[int]
     genres: List[int]
-    visitor_categories: List[int]
 
 
 class ActivityPreferencesGet(BaseModel):

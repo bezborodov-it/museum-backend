@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 from api.cruds.base import Base, with_model
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.models import (
-    VisitorCategoryORM,
     PushTokenORM,
     GenreORM,
 )
+from api.models.enum import AgeEnum
 
 from api.models.orms.event import ExhibitionORM, TagORM
 
@@ -28,8 +28,8 @@ class Exhibition(Base):
         cls,
         session: AsyncSession,
         location_ids: List[int] = None,
-        visitor_category_ids: List[int] = None,
         category_ids: List[int] = None,
+        age: List[AgeEnum] = None,
         disabilities: bool = None,
         is_free: bool = None,
         privilege_ticket: bool = None,
@@ -44,13 +44,12 @@ class Exhibition(Base):
         if location_ids:
             query = query.filter(cls.model.location_id.in_(location_ids))
 
-        if visitor_category_ids:
-            query = query.filter(
-                cls.model.visitor_category_id.in_(visitor_category_ids)
-            )
-
         if category_ids:
             query = query.filter(cls.model.category_id.in_(category_ids))
+
+        if age:
+            age_values = [a.value for a in age]
+            query = query.filter(cls.model.age.in_(age_values))
 
         if disabilities is not None:
             query = query.filter(cls.model.disabilities == disabilities)
@@ -92,11 +91,6 @@ class Exhibition(Base):
         genres = (
             [g.id for g in push_token_obj.genres] if push_token_obj.genres else None
         )
-        visitor_categories = (
-            [vc.id for vc in push_token_obj.visitor_categories]
-            if push_token_obj.visitor_categories
-            else None
-        )
         tags = [t.id for t in push_token_obj.tags] if push_token_obj.tags else None
 
         query = select(cls.model)
@@ -104,11 +98,6 @@ class Exhibition(Base):
 
         if tags:
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
-
-        if visitor_categories:
-            query = query.join(cls.model.visitor_category).filter(
-                VisitorCategoryORM.id.in_(visitor_categories)
-            )
 
         if genres:
             query = query.join(cls.model.genre).filter(GenreORM.id.in_(genres))

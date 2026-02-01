@@ -5,7 +5,6 @@ from .orms import (
     EventORM,
     TagORM,
     GenreORM,
-    VisitorCategoryORM,
     LocationORM,
     PushTokenORM,
     NotificationORM,
@@ -28,7 +27,6 @@ __all__ = (
     "EventORM",
     "TagORM",
     "GenreORM",
-    "VisitorCategoryORM",
     "LocationORM",
     "CategoryORM",
     # notification
