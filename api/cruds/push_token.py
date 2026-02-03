@@ -1,11 +1,13 @@
 from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete, insert
 
 from api.cruds.base import Base, with_model
 from api.exceptions.cruds import NotFoundError
 from api.models import PushTokenORM
+from api.models.associations import push_token_activity_type_association, push_token_age_association
+from api.models.enum import ActivityTypeEnum, AgeEnum
 
 
 @with_model(PushTokenORM)
@@ -28,8 +30,10 @@ class PushToken(Base):
         session: AsyncSession,
         push_token: str,
         tag_ids: List[int],
+        activity_types: List[ActivityTypeEnum],
         genre_ids: List[int],
-    ) -> PushTokenORM:
+        ages: List[AgeEnum]
+    ):
 
         push_token_obj = await cls.get_by_token(session, push_token)
         if push_token_obj is None:
@@ -38,10 +42,45 @@ class PushToken(Base):
 
         data = {
             "tags": tag_ids,
-            "genres": genre_ids,
+            "genres": genre_ids
         }
 
         if data:
             push_token_obj = await cls.update(session, push_token_obj.id, data)
 
-        return push_token_obj
+        if activity_types:
+            await session.execute(
+                delete(push_token_activity_type_association).where(
+                    push_token_activity_type_association.c.push_token_id == push_token_obj.id
+                )
+            )
+
+            # Добавляем новые связи
+            for activity_type in activity_types:
+                await session.execute(
+                    insert(push_token_activity_type_association).values(
+                        push_token_id=push_token_obj.id,
+                        type=activity_type
+                    )
+                )
+
+            # Обработка ages через association таблицу
+        if ages:
+            # Удаляем старые связи
+            await session.execute(
+                delete(push_token_age_association).where(
+                    push_token_age_association.c.push_token_id == push_token_obj.id
+                )
+            )
+
+            # Добавляем новые связи
+            for age in ages:
+                await session.execute(
+                    insert(push_token_age_association).values(
+                        push_token_id=push_token_obj.id,
+                        age=age
+                    )
+                )
+
+        await session.commit()
+        await session.refresh(push_token_obj)

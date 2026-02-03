@@ -19,3 +19,7 @@ class AgeEnum(StrEnum):
             "EIGHTEEN_PLUS": "18+",
         }
         return mapping[self.value]
+
+class ActivityTypeEnum(StrEnum):
+    EXHIBITION = "EXHIBITION"
+    EVENT = "EVENT"

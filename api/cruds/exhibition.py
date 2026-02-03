@@ -8,6 +8,7 @@ from api.models import (
     PushTokenORM,
     GenreORM,
 )
+from api.models.associations import push_token_age_association
 from api.models.enum import AgeEnum
 
 from api.models.orms.event import ExhibitionORM, TagORM
@@ -85,13 +86,18 @@ class Exhibition(Base):
 
     @classmethod
     async def get_by_preferences(
-        cls, session: AsyncSession, push_token_obj: PushTokenORM, limit: int = 3
+        cls, session: AsyncSession, push_token_obj: PushTokenORM
     ) -> List[ExhibitionORM]:
 
         genres = (
             [g.id for g in push_token_obj.genres] if push_token_obj.genres else None
         )
         tags = [t.id for t in push_token_obj.tags] if push_token_obj.tags else None
+        ages_result = await session.execute(
+            select(push_token_age_association.c.age)
+            .where(push_token_age_association.c.push_token_id == push_token_obj.id)
+        )
+        ages = [row[0] for row in ages_result.all()] if ages_result else None
 
         query = select(cls.model)
         query = query.filter(cls.model.date_end >= datetime.now() + timedelta(hours=5))
@@ -102,9 +108,17 @@ class Exhibition(Base):
         if genres:
             query = query.join(cls.model.genre).filter(GenreORM.id.in_(genres))
 
+        if ages:
+            age_order = case(
+                {age: i for i, age in enumerate(ages)},
+                value=cls.model.age,
+                else_=len(ages)
+            )
+            query = query.order_by(cls.model.date_start.asc(), age_order.asc())
+        else:
+            query = query.order_by(cls.model.date_start.asc())
+
         query = query.group_by(cls.model.id)
-        query = query.order_by(func.min(cls.model.date_start))
-        query = query.limit(limit)
 
         result = await session.execute(query)
         exhibitions = result.scalars().unique().all()

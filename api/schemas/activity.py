@@ -1,9 +1,9 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 from pydantic import BaseModel, field_serializer
 
 from .location import LocationShallow
-from ..models.enum import AgeEnum
+from ..models.enum import AgeEnum, ActivityTypeEnum
 
 
 class CategoryBase(BaseModel):
@@ -279,12 +279,14 @@ class ExhibitionsAdminGet(BaseModel):
 class ActivityPreferencesCreate(BaseModel):
     push_token: str
     tags: List[int]
-    genres: List[int]
+    activity_types: List[ActivityTypeEnum]
+    genres: List[int] = []
+    ages: List[AgeEnum]
 
 
 class ActivityPreferencesGet(BaseModel):
-    events: List[ShallowEvent]
-    exhibitions: List[ShallowExhibition]
+    items: List[Union[ShallowExhibition, ShallowEvent]]
+    total: int
 
 
 class CategoryCreate(BaseModel):
