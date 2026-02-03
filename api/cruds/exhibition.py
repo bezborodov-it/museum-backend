@@ -89,9 +89,6 @@ class Exhibition(Base):
         cls, session: AsyncSession, push_token_obj: PushTokenORM
     ) -> List[ExhibitionORM]:
 
-        genres = (
-            [g.id for g in push_token_obj.genres] if push_token_obj.genres else None
-        )
         tags = [t.id for t in push_token_obj.tags] if push_token_obj.tags else None
         ages_result = await session.execute(
             select(push_token_age_association.c.age)
@@ -104,9 +101,6 @@ class Exhibition(Base):
 
         if tags:
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
-
-        if genres:
-            query = query.join(cls.model.genre).filter(GenreORM.id.in_(genres))
 
         if ages:
             age_order = case(
