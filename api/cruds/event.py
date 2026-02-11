@@ -98,8 +98,7 @@ class Event(Base):
             select(push_token_age_association.c.age)
             .where(push_token_age_association.c.push_token_id == push_token_obj.id)
         )
-        ages = [row[0] for row in ages_result.all()] if ages_result else None
-
+        ages = [AgeEnum(a) for a in ages_result.scalars().all()]
 
         query = select(cls.model)
         query = query.filter(
