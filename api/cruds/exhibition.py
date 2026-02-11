@@ -103,7 +103,6 @@ class Exhibition(Base):
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
 
         if ages:
-
             AGES_PRIORITY = [
                 AgeEnum.EIGHTEEN_PLUS,
                 AgeEnum.SIXTEEN_PLUS,
@@ -112,8 +111,15 @@ class Exhibition(Base):
                 AgeEnum.ZERO_PLUS,
             ]
 
-            ordered = [AgeEnum(a) for a in ages if AgeEnum(a) in AGES_PRIORITY]
-            ordered += [a for a in AGES_PRIORITY if a not in ordered]
+            selected = [a for a in AGES_PRIORITY if a in ages]
+            min_idx = min([AGES_PRIORITY.index(a) for a in selected])
+            max_idx = max([AGES_PRIORITY.index(a) for a in selected])
+
+            ordered = selected.copy()
+
+            ordered += [a for a in reversed(AGES_PRIORITY[max_idx + 1:]) if a not in ordered]
+
+            ordered += [a for a in AGES_PRIORITY[:min_idx] if a not in ordered]
 
             age_order = case(
                 {literal_column(f"'{age.value}'"): i for i, age in enumerate(ordered)},
