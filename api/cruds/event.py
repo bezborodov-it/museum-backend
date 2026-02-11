@@ -121,16 +121,27 @@ class Event(Base):
                 AgeEnum.ZERO_PLUS,
             ]
 
+            # выбранные пользователем возраста
             selected = [a for a in AGES_PRIORITY if a in ages]
-            min_idx = min([AGES_PRIORITY.index(a) for a in selected])
-            max_idx = max([AGES_PRIORITY.index(a) for a in selected])
 
+            if not selected:
+                selected = []
+
+            min_idx = min([AGES_PRIORITY.index(a) for a in selected]) if selected else 0
+            max_idx = max([AGES_PRIORITY.index(a) for a in selected]) if selected else 0
+
+            # формируем порядок сортировки
             ordered = selected.copy()
-            ordered += [a for a in AGES_PRIORITY[max_idx + 1:] if a not in ordered]
-            ordered += [a for a in AGES_PRIORITY[:min_idx] if a not in ordered]
+            ordered += [a for a in reversed(AGES_PRIORITY[min_idx + 1:]) if a not in ordered]  # младшие
+            ordered += [a for a in AGES_PRIORITY[:min_idx] if a not in ordered]  # старшие
 
+            # фильтруем события: оставляем только >= минимального выбранного возраста
+            allowed_ages = [a for a in AGES_PRIORITY if
+                            any(AGES_PRIORITY.index(a) >= AGES_PRIORITY.index(sel) for sel in selected)]
+            query = query.filter(cls.model.age.in_(allowed_ages))
+
+            # CASE для сортировки по age
             age_mapping = {a: i for i, a in enumerate(ordered)}
-
             age_order = case(age_mapping, value=cls.model.age, else_=len(ordered))
 
             query = query.order_by(cls.model.date_start.asc(), age_order.asc())
