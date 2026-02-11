@@ -22,8 +22,6 @@ class PushToken(Base):
         query = select(cls.model).where(cls.model.push_token == push_token)
         result = await session.execute(query)
         obj = result.scalar_one_or_none()
-        if obj is None:
-            raise NotFoundError(cls.model.__tablename__, "token", push_token)
         return obj
 
     @classmethod
