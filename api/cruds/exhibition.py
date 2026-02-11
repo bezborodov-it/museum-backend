@@ -1,4 +1,4 @@
-from sqlalchemy import select, or_, func, case, literal_column
+from sqlalchemy import select, or_, func, case, String, cast
 from typing import List, Tuple
 from datetime import datetime, timedelta
 
@@ -116,16 +116,12 @@ class Exhibition(Base):
             max_idx = max([AGES_PRIORITY.index(a) for a in selected])
 
             ordered = selected.copy()
-
-            ordered += [a for a in reversed(AGES_PRIORITY[max_idx + 1:]) if a not in ordered]
-
+            ordered += [a for a in AGES_PRIORITY[max_idx + 1:] if a not in ordered]
             ordered += [a for a in AGES_PRIORITY[:min_idx] if a not in ordered]
 
-            age_order = case(
-                {literal_column(f"'{age.value}'"): i for i, age in enumerate(ordered)},
-                value=cls.model.age,
-                else_=len(ordered),
-            )
+            age_mapping = {a: i for i, a in enumerate(ordered)}
+
+            age_order = case(age_mapping, value=cls.model.age, else_=len(ordered))
 
             query = query.order_by(cls.model.date_start.asc(), age_order.asc())
         else:
