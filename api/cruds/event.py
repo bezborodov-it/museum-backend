@@ -114,11 +114,29 @@ class Event(Base):
             query = query.join(cls.model.genre).filter(GenreORM.id.in_(genres))
 
         if ages:
+
+            AGES_PRIORITY = [
+                AgeEnum.EIGHTEEN_PLUS,
+                AgeEnum.SIXTEEN_PLUS,
+                AgeEnum.TWELVE_PLUS,
+                AgeEnum.SIX_PLUS,
+                AgeEnum.ZERO_PLUS,
+            ]
+            ordered = []
+            for a in ages:
+                if a in AGES_PRIORITY:
+                    ordered.append(a)
+
+            for a in AGES_PRIORITY:
+                if a not in ordered:
+                    ordered.append(a)
+
             age_order = case(
-                {age: i for i, age in enumerate(ages)},
+                {age: i for i, age in enumerate(ordered)},
                 value=cls.model.age,
-                else_=len(ages)
+                else_=len(ordered),
             )
+
             query = query.order_by(cls.model.date_start.asc(), age_order.asc())
         else:
             query = query.order_by(cls.model.date_start.asc())
