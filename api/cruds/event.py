@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func, case, literal_column
 from typing import List
 from datetime import datetime, timedelta
 from api.cruds.base import Base, with_model
@@ -121,17 +121,12 @@ class Event(Base):
                 AgeEnum.SIX_PLUS,
                 AgeEnum.ZERO_PLUS,
             ]
-            ordered = []
-            for a in ages:
-                if a in AGES_PRIORITY:
-                    ordered.append(a)
 
-            for a in AGES_PRIORITY:
-                if a not in ordered:
-                    ordered.append(a)
+            ordered = [AgeEnum(a) for a in ages if AgeEnum(a) in AGES_PRIORITY]
+            ordered += [a for a in AGES_PRIORITY if a not in ordered]
 
             age_order = case(
-                {age: i for i, age in enumerate(ordered)},
+                {literal_column(f"'{age.value}'"): i for i, age in enumerate(ordered)},
                 value=cls.model.age,
                 else_=len(ordered),
             )
