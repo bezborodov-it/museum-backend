@@ -19,25 +19,25 @@ class Exhibition(Base):
 
     @classmethod
     async def update_image_url(
-        cls, session: AsyncSession, exhibition_id: int, image_url: str
+            cls, session: AsyncSession, exhibition_id: int, image_url: str
     ) -> ExhibitionORM:
         exhibition = await cls.update(session, exhibition_id, {"image_url": image_url})
         return exhibition
 
     @classmethod
     async def filter(
-        cls,
-        session: AsyncSession,
-        location_ids: List[int] = None,
-        category_ids: List[int] = None,
-        age: List[AgeEnum] = None,
-        disabilities: bool = None,
-        is_free: bool = None,
-        privilege_ticket: bool = None,
-        pushkin_card: bool = None,
-        audio_guide: bool = None,
-        offset: int = 0,
-        limit: int = 10,
+            cls,
+            session: AsyncSession,
+            location_ids: List[int] = None,
+            category_ids: List[int] = None,
+            age: List[AgeEnum] = None,
+            disabilities: bool = None,
+            is_free: bool = None,
+            privilege_ticket: bool = None,
+            pushkin_card: bool = None,
+            audio_guide: bool = None,
+            offset: int = 0,
+            limit: int = 10,
     ) -> List[ExhibitionORM]:
         query = select(cls.model)
         query = query.filter(cls.model.date_end >= datetime.now() + timedelta(hours=5))
@@ -86,7 +86,7 @@ class Exhibition(Base):
 
     @classmethod
     async def get_by_preferences(
-        cls, session: AsyncSession, push_token_obj: PushTokenORM
+            cls, session: AsyncSession, push_token_obj: PushTokenORM
     ) -> List[ExhibitionORM]:
 
         tags = [t.id for t in push_token_obj.tags] if push_token_obj.tags else None
@@ -103,11 +103,29 @@ class Exhibition(Base):
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
 
         if ages:
+
+            AGES_PRIORITY = [
+                AgeEnum.EIGHTEEN_PLUS,
+                AgeEnum.SIXTEEN_PLUS,
+                AgeEnum.TWELVE_PLUS,
+                AgeEnum.SIX_PLUS,
+                AgeEnum.ZERO_PLUS,
+            ]
+            ordered = []
+            for a in ages:
+                if a in AGES_PRIORITY:
+                    ordered.append(a)
+
+            for a in AGES_PRIORITY:
+                if a not in ordered:
+                    ordered.append(a)
+
             age_order = case(
-                {age: i for i, age in enumerate(ages)},
+                {age: i for i, age in enumerate(ordered)},
                 value=cls.model.age,
-                else_=len(ages)
+                else_=len(ordered),
             )
+
             query = query.order_by(cls.model.date_start.asc(), age_order.asc())
         else:
             query = query.order_by(cls.model.date_start.asc())
