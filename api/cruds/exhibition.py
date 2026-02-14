@@ -10,7 +10,7 @@ from api.models import (
 )
 from api.models.associations import push_token_age_association
 from api.models.enum import AgeEnum
-from api.utils.age import build_age_case
+from api.utils.age import build_age_priority_and_allowed
 from api.models.orms.event import ExhibitionORM, TagORM
 
 
@@ -103,16 +103,17 @@ class Exhibition(Base):
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
 
         if ages:
-            age_order = build_age_case(cls.model.age, ages)
-
+            age_priority, allowed_ages = build_age_priority_and_allowed(cls.model.age, ages)
+            query = query.filter(cls.model.age.in_(allowed_ages))
             query = query.order_by(
-                age_order.asc(),
+                cls.model.id,  # обязательно для DISTINCT ON
+                age_priority.asc(),
                 cls.model.date_start.asc()
             )
         else:
             query = query.order_by(cls.model.date_start.asc())
 
-        query = query.group_by(cls.model.id)
+        query = query.distinct(cls.model.id)
 
         result = await session.execute(query)
         exhibitions = result.scalars().unique().all()

@@ -11,32 +11,33 @@ from api.models import (
 )
 from api.models.associations import push_token_age_association
 from api.models.enum import AgeEnum
-from api.utils.age import build_age_case
+from api.utils.age import build_age_priority_and_allowed
+
 
 @with_model(EventORM)
 class Event(Base):
 
     @classmethod
     async def update_image_url(
-        cls, session: AsyncSession, event_id: int, image_url: str
+            cls, session: AsyncSession, event_id: int, image_url: str
     ) -> EventORM:
         event = await cls.update(session, event_id, {"image_url": image_url})
         return event
 
     @classmethod
     async def filter(
-        cls,
-        session: AsyncSession,
-        genre_ids: List[int] = None,
-        location_ids: List[int] = None,
-        category_ids: List[int] = None,
-        age: List[AgeEnum] = None,
-        disabilities: bool = None,
-        is_free: bool = None,
-        privilege_ticket: bool = None,
-        pushkin_card: bool = None,
-        offset: int = 0,
-        limit: int = 10,
+            cls,
+            session: AsyncSession,
+            genre_ids: List[int] = None,
+            location_ids: List[int] = None,
+            category_ids: List[int] = None,
+            age: List[AgeEnum] = None,
+            disabilities: bool = None,
+            is_free: bool = None,
+            privilege_ticket: bool = None,
+            pushkin_card: bool = None,
+            offset: int = 0,
+            limit: int = 10,
     ) -> List[EventORM]:
         query = select(cls.model)
         query = query.filter(
@@ -87,7 +88,7 @@ class Event(Base):
 
     @classmethod
     async def get_by_preferences(
-        cls, session: AsyncSession, push_token_obj: PushTokenORM
+            cls, session: AsyncSession, push_token_obj: PushTokenORM
     ) -> List[EventORM]:
 
         genres = (
@@ -108,22 +109,22 @@ class Event(Base):
         if tags:
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
 
-
         if genres:
             query = query.join(cls.model.genre).filter(GenreORM.id.in_(genres))
 
         if ages:
-            age_order = build_age_case(cls.model.age, ages)
-
+            age_priority, allowed_ages = build_age_priority_and_allowed(cls.model.age, ages)
+            query = query.filter(cls.model.age.in_(allowed_ages))
             query = query.order_by(
-                age_order.asc(),
+                cls.model.id,
+                age_priority.asc(),
                 cls.model.date_start.asc()
             )
 
         else:
             query = query.order_by(cls.model.date_start.asc())
 
-        query = query.group_by(cls.model.id)
+        query = query.distinct(cls.model.id)
 
         result = await session.execute(query)
         events = result.scalars().unique().all()
