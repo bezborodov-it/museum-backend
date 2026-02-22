@@ -107,11 +107,11 @@ class Exhibition(Base):
             query = query.filter(cls.model.age.in_(allowed_ages))
             query = query.order_by(
                 cls.model.id,  # обязательно для DISTINCT ON
+                cls.model.date_end.asc(),
                 age_priority.asc(),
-                cls.model.date_start.asc()
             )
         else:
-            query = query.order_by(cls.model.date_start.asc())
+            query = query.order_by(cls.model.date_end.asc())
 
         query = query.distinct(cls.model.id)
 

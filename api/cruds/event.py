@@ -117,8 +117,8 @@ class Event(Base):
             query = query.filter(cls.model.age.in_(allowed_ages))
             query = query.order_by(
                 cls.model.id,
+                cls.model.date_start.asc(),
                 age_priority.asc(),
-                cls.model.date_start.asc()
             )
 
         else:
