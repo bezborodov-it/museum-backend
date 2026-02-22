@@ -122,7 +122,10 @@ class Event(Base):
             )
 
         else:
-            query = query.order_by(cls.model.date_start.asc())
+            query = query.order_by(
+                cls.model.id,
+                cls.model.date_start.asc(),
+            )
 
         query = query.distinct(cls.model.id)
 
