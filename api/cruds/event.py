@@ -116,18 +116,14 @@ class Event(Base):
             age_priority, allowed_ages = build_age_priority_and_allowed(cls.model.age, ages)
             query = query.filter(cls.model.age.in_(allowed_ages))
             query = query.order_by(
-                cls.model.id,
                 cls.model.date_start.asc(),
-                age_priority.asc(),
+                age_priority.asc()
             )
 
         else:
             query = query.order_by(
-                cls.model.id,
-                cls.model.date_start.asc(),
+                cls.model.date_start.asc()
             )
-
-        query = query.distinct(cls.model.id)
 
         result = await session.execute(query)
         events = result.scalars().unique().all()
