@@ -111,7 +111,10 @@ class Exhibition(Base):
                 age_priority.asc(),
             )
         else:
-            query = query.order_by(cls.model.date_end.asc())
+            query = query.order_by(
+                cls.model.id,
+                cls.model.date_end.asc(),
+            )
 
         query = query.distinct(cls.model.id)
 
