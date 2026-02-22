@@ -37,7 +37,8 @@ class EventORM(BaseORM, DateORMMixin):
     min_price = Column(Integer, nullable=True)
     pinned_order = Column(SmallInteger, nullable=True, default=None)
     age = Column(Enum(AgeEnum), nullable=False, default=AgeEnum.ZERO_PLUS)
-
+    duration = Column(Integer, nullable=True)
+    require_registration = Column(Boolean, nullable=False, default=False)
     location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
     genre_id = Column(BigInteger, ForeignKey("genre.id"), nullable=False)
 

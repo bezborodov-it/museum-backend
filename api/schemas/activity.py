@@ -47,9 +47,11 @@ class EventBase(BaseModel):
     image_url: Optional[str]
     date_start: datetime
     is_free: bool
+    require_registration: bool
     privilege_ticket: bool
     pushkin_card: bool
     min_price: Optional[int]
+    duration: Optional[int]
     payment_url: Optional[str]
     location: LocationShallow
     age: AgeEnum
@@ -111,8 +113,10 @@ class EventCreate(BaseModel):
     payment_url: Optional[str] = None
     is_free: bool
     privilege_ticket: bool
+    require_registration: bool
     pushkin_card: bool
     min_price: Optional[int] = None
+    duration: Optional[int] = None
     location_id: Optional[int] = None
     genre_id: Optional[int] = None
     age: AgeEnum
@@ -129,9 +133,11 @@ class EventUpdate(BaseModel):
     date_start: Optional[datetime] = None
     payment_url: Optional[str] = None
     is_free: Optional[bool] = None
+    require_registration: Optional[bool] = None
     privilege_ticket: Optional[bool] = None
     pushkin_card: Optional[bool] = None
     min_price: Optional[int] = None
+    duration: Optional[int] = None
     location_id: Optional[int] = None
     genre_id: Optional[int] = None
     age: Optional[AgeEnum] = None
