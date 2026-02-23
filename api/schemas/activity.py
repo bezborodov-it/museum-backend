@@ -179,6 +179,7 @@ class ExhibitionBase(BaseModel):
     date_end: datetime
     min_price: Optional[int]
     is_free: bool
+    require_registration: bool
     audio_guide: bool
     privilege_ticket: bool
     pushkin_card: bool
@@ -238,6 +239,7 @@ class ExhibitionCreate(BaseModel):
     date_end: datetime
     payment_url: Optional[str] = None
     is_free: bool
+    require_registration: bool
     audio_guide: bool
     privilege_ticket: bool
     pushkin_card: bool
@@ -258,6 +260,7 @@ class ExhibitionUpdate(BaseModel):
     date_end: Optional[datetime] = None
     payment_url: Optional[str] = None
     is_free: Optional[bool] = None
+    require_registration: Optional[bool] = None
     audio_guide: Optional[bool] = None
     privilege_ticket: Optional[bool] = None
     pushkin_card: Optional[bool] = None

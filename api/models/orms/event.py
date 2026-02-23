@@ -84,6 +84,7 @@ class ExhibitionORM(BaseORM, DateORMMixin):
     payment_url = Column(String, nullable=True)
     min_price = Column(Integer, nullable=True)
     is_free = Column(Boolean, nullable=False)
+    require_registration = Column(Boolean, nullable=False, default=False)
     privilege_ticket = Column(Boolean, nullable=False)
     pushkin_card = Column(Boolean, nullable=False)
     audio_guide = Column(Boolean, nullable=False)
