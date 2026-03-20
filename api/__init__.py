@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 
 from api.configuration.config import settings
 from api.configuration.database import disconnect_db
-from api.service.redis import redis_service
 from api.exceptions import init_exception_handlers
 
 _app: Optional[FastAPI] = None
@@ -17,11 +16,9 @@ _app: Optional[FastAPI] = None
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Startup
-    await redis_service.connect()
     yield
     # Shutdown
     await disconnect_db()
-    await redis_service.redis.close()
 
 
 def _init_app() -> FastAPI:
