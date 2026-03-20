@@ -36,11 +36,7 @@ class Settings(BaseSettings):
     JWT_TOKEN_EXPIRES: int = int(os.getenv("JWT_TOKEN_EXPIRES", 7))
     ACCESS_TOKEN_EXPIRE_MINUTES: str = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
     REFRESH_TOKEN_EXPIRE_DAYS: str = os.getenv("REFRESH_TOKEN_EXPIRE_DAYS")
-    # redis
-    REDIS_HOST: str = "redis"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+
     CELERY_TIMEZONE: str = os.getenv("CELERY_TIMEZONE", "")
     # Static
     STATIC_DIR: str = os.getenv("STATIC_DIR", "./api/static/")
@@ -50,16 +46,7 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = os.getenv("", "EMAIL_PASSWORD")
     SMTP_PORT: str = os.getenv("", "EMAIL_PORT")
     SMTP_SENDER: str = os.getenv("", "SMTP_SENDER")
-    # whatsapp
-    API_URL: str = os.getenv("", "API_URL")
-    INSTANCE_ID: str = os.getenv("", "INSTANCE_ID")
-    API_TOKEN: str = os.getenv("", "API_TOKEN")
-    AUTH_MESSAGE_TEMPLATE: str = os.getenv("", "AUTH_MESSAGE_TEMPLATE")
-    # yoomoney
-    YOOMONEY_RECEIVER: str = os.getenv("", "YOOMONEY_RECEIVER")
-    YOOMONEY_QUIQPAY_FORM: str = os.getenv("", "YOOMONEY_QUIQPAY_FORM")
-    YOOMONEY_PAYMENT_TYPE: str = os.getenv("", "YOOMONEY_PAYMENT_TYPE")
-    YOOMONEY_NOTIFICATION_SECRET: str = os.getenv("", "YOOMONEY_NOTIFICATION_SECRET")
+
     # Expo push notifications
     EXPO_NOTIFICATIONS_URL: str = os.getenv("", "EXPO_NOTIFICATIONS_URL")
     # RabbitMQ
