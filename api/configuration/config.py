@@ -30,12 +30,6 @@ class Settings(BaseSettings):
         "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
         "pk": "pk_%(table_name)s",
     }
-    # auth
-    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
-    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
-    JWT_TOKEN_EXPIRES: int = int(os.getenv("JWT_TOKEN_EXPIRES", 7))
-    ACCESS_TOKEN_EXPIRE_MINUTES: str = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-    REFRESH_TOKEN_EXPIRE_DAYS: str = os.getenv("REFRESH_TOKEN_EXPIRE_DAYS")
 
     CELERY_TIMEZONE: str = os.getenv("CELERY_TIMEZONE", "")
     # Static
