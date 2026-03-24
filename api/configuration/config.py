@@ -60,6 +60,7 @@ class DevSettings(Settings):
         "http://музеум.рф",
         "http://xn--e1adoc6ac.xn--p1ai",
         "http://80.87.111.240",
+        "http://91.229.234.70"
     ]
     CORS_ORIGIN_REGEX: str = (
         r"(http:\/\/80\.87\.111\.240|http:\/\/музеум\.рф|http:\/\/xn--e1adoc6ac\.xn--p1ai|http:\/\/localhost:5173|http:\/\/localhost:8081)"
