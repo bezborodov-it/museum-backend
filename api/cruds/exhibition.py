@@ -134,8 +134,8 @@ class Exhibition(Base):
             query = query.where(field.ilike(f"%{search}%"))
 
         query = query.order_by(
-            cls.model.date_start.asc(),
-            cls.model.id.asc()
+            cls.model.date_start.desc(),
+            cls.model.id.desc()
         )
         total_count = await session.scalar(
             select(func.count()).select_from(query.subquery())
