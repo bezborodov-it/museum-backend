@@ -128,3 +128,33 @@ class Event(Base):
         result = await session.execute(query)
         events = result.scalars().unique().all()
         return events
+
+    @classmethod
+    async def get_admin_list(
+            cls,
+            session: AsyncSession,
+            search: str,
+            offset: int = 0,
+            limit: int = 10,
+            is_notification: bool = False,
+    ) -> List[EventORM]:
+        query = select(cls.model)
+
+        if search:
+            field = cls.model.title if is_notification else cls.model.name
+            query = query.where(field.ilike(f"%{search}%"))
+
+        query = query.order_by(
+            cls.model.date_start.asc(),
+            cls.model.id.asc()
+        )
+        total_count = await session.scalar(
+            select(func.count()).select_from(query.subquery())
+        )
+
+        query = query.offset(offset).limit(limit)
+        result = await session.execute(query)
+
+        items = result.scalars().all()
+
+        return items, total_count
