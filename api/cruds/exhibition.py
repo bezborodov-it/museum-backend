@@ -1,4 +1,4 @@
-from sqlalchemy import select, or_, func, case, String, cast
+from sqlalchemy import select, or_, func, case, String, cast, and_
 from typing import List, Tuple
 from datetime import datetime, timedelta
 
@@ -9,7 +9,7 @@ from api.models import (
     GenreORM,
 )
 from api.models.associations import push_token_age_association
-from api.models.enum import AgeEnum
+from api.models.enum import AgeEnum, ActivityVisibilityEnum
 from api.utils.age import build_age_priority_and_allowed
 from api.models.orms.event import ExhibitionORM, TagORM
 
@@ -40,10 +40,24 @@ class Exhibition(Base):
             limit: int = 10,
     ) -> List[ExhibitionORM]:
         query = select(cls.model)
-        query = query.filter(cls.model.date_end >= datetime.now() + timedelta(hours=5))
+        query = query.filter(
+            cls.model.date_end >= datetime.now() + timedelta(hours=5),
+            cls.model.status == ActivityVisibilityEnum.ACTIVE,
+        )
 
         if location_ids:
-            query = query.filter(cls.model.location_id.in_(location_ids))
+            has_null = -1 in location_ids
+            real_ids = [x for x in location_ids if x != -1]
+
+            if has_null and real_ids:
+                query = query.filter(or_(
+                    cls.model.location_id.in_(real_ids),
+                    cls.model.location_id.is_(None),
+                ))
+            elif has_null:
+                query = query.filter(cls.model.location_id.is_(None))
+            else:
+                query = query.filter(cls.model.location_id.in_(real_ids))
 
         if category_ids:
             query = query.filter(cls.model.category_id.in_(category_ids))
@@ -97,7 +111,10 @@ class Exhibition(Base):
         ages = [AgeEnum(a) for a in ages_result.scalars().all()]
 
         query = select(cls.model)
-        query = query.filter(cls.model.date_end >= datetime.now() + timedelta(hours=5))
+        query = query.filter(
+            cls.model.date_end >= datetime.now() + timedelta(hours=5),
+            cls.model.status == ActivityVisibilityEnum.ACTIVE
+        )
 
         if tags:
             query = query.join(cls.model.tags).filter(TagORM.id.in_(tags))
@@ -123,27 +140,48 @@ class Exhibition(Base):
             cls,
             session: AsyncSession,
             search: str,
+            status: ActivityVisibilityEnum | None = None,
             offset: int = 0,
             limit: int = 10,
             is_notification: bool = False,
-    ) -> List[ExhibitionORM]:
+    ):
+        now = func.now()
+
         query = select(cls.model)
 
         if search:
             field = cls.model.title if is_notification else cls.model.name
             query = query.where(field.ilike(f"%{search}%"))
 
+        if status is not None:
+            query = query.where(cls.model.status == status)
+
         query = query.order_by(
+            case(
+                (
+                    and_(
+                        cls.model.date_start <= now,
+                        cls.model.date_end >= now,
+                    ),
+                    0,
+                ),
+                (cls.model.date_start > now, 1),
+                else_=2,
+            ),
+            case(
+                (cls.model.date_start > now, cls.model.date_start),
+                else_=None,
+            ).asc(),
             cls.model.date_start.desc(),
-            cls.model.id.desc()
+            cls.model.id.desc(),
         )
+
         total_count = await session.scalar(
             select(func.count()).select_from(query.subquery())
         )
 
         query = query.offset(offset).limit(limit)
         result = await session.execute(query)
-
         items = result.scalars().all()
 
         return items, total_count

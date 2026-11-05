@@ -2,8 +2,8 @@ from typing import Optional, List, Union
 from datetime import datetime
 from pydantic import BaseModel, field_serializer
 
-from .location import LocationShallow
-from ..models.enum import AgeEnum, ActivityTypeEnum
+from api.schemas.location import LocationShallow
+from api.models.enum import AgeEnum, ActivityTypeEnum, ActivityVisibilityEnum
 
 
 class CategoryBase(BaseModel):
@@ -53,7 +53,7 @@ class EventBase(BaseModel):
     min_price: Optional[int]
     duration: Optional[int]
     payment_url: Optional[str]
-    location: LocationShallow
+    location: Optional[LocationShallow] = None
     age: AgeEnum
     genre: GenreBase
     category: Optional[CategoryBase]
@@ -79,7 +79,7 @@ class ShallowEvent(BaseModel):
     is_free: bool
     privilege_ticket: bool
     pushkin_card: bool
-    location: LocationShallow
+    location: Optional[LocationShallow] = None
     age: AgeEnum
     category: Optional[CategoryBase]
 
@@ -94,6 +94,7 @@ class ShallowEvent(BaseModel):
 class ShallowAdminEvent(BaseModel):
     id: int
     name: str
+    status: ActivityVisibilityEnum
 
     class Config:
         from_attributes = True
@@ -121,6 +122,7 @@ class EventCreate(BaseModel):
     genre_id: Optional[int] = None
     age: AgeEnum
     category_id: Optional[int] = None
+    status: ActivityVisibilityEnum = ActivityVisibilityEnum.ACTIVE
 
     tags: List[int]
 
@@ -142,6 +144,7 @@ class EventUpdate(BaseModel):
     genre_id: Optional[int] = None
     age: Optional[AgeEnum] = None
     category_id: Optional[int] = None
+    status: Optional[ActivityVisibilityEnum] = None
 
     tags: Optional[List[int]] = []
 
@@ -185,7 +188,7 @@ class ExhibitionBase(BaseModel):
     pushkin_card: bool
     payment_url: Optional[str]
 
-    location: LocationShallow
+    location: Optional[LocationShallow] = None
     age: AgeEnum
     category: Optional[CategoryBase]
 
@@ -213,7 +216,7 @@ class ShallowExhibition(BaseModel):
     privilege_ticket: bool
     pushkin_card: bool
 
-    location: LocationShallow
+    location: Optional[LocationShallow] = None
     age: AgeEnum
     category: Optional[CategoryBase]
 
@@ -247,6 +250,7 @@ class ExhibitionCreate(BaseModel):
     location_id: Optional[int] = None
     age: AgeEnum
     category_id: Optional[int] = None
+    status: ActivityVisibilityEnum = ActivityVisibilityEnum.ACTIVE
 
     tags: List[int]
 
@@ -268,6 +272,7 @@ class ExhibitionUpdate(BaseModel):
     location_id: Optional[int] = None
     age: Optional[AgeEnum] = None
     category_id: Optional[int] = None
+    status: Optional[ActivityVisibilityEnum] = None
 
     tags: Optional[List[int]] = []
 
@@ -275,6 +280,7 @@ class ExhibitionUpdate(BaseModel):
 class ShallowAdminExhibition(BaseModel):
     id: int
     name: str
+    status: ActivityVisibilityEnum
 
     class Config:
         from_attributes = True

@@ -23,3 +23,7 @@ class AgeEnum(StrEnum):
 class ActivityTypeEnum(StrEnum):
     EXHIBITION = "EXHIBITION"
     EVENT = "EVENT"
+
+class ActivityVisibilityEnum(StrEnum):
+    ACTIVE = "active"
+    HIDDEN = "hidden"

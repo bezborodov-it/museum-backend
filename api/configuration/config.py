@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     RABBIT_USER: str = os.getenv("", "RABBIT_USER")
     RABBIT_PASSWORD: str = os.getenv("", "RABBIT_PASSWORD")
 
+    SERVICE_ENABLED: bool = True
+    APP_VERSION: str = "dev"
+
 
 class LocalSettings(Settings):
     RELOAD: bool = True

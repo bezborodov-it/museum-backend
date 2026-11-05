@@ -28,6 +28,7 @@ from api.configuration.database.db_helper import db_helper
 from api.dependencies import get_basic_user, get_image_with
 from api.models import UserORM
 from api.utils.image import save_image
+from api.models.enum import ActivityVisibilityEnum
 
 site_router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -50,15 +51,19 @@ response_codes = {
     },
 )
 async def get_admin_events(
-    search: Optional[str] = Query(None, description="Search string"),
-    offset: int = Query(0, ge=0, description="Offset"),
-    limit: int = Query(10, gt=0, le=100, description="Limit"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        search: Optional[str] = Query(None, description="Search string"),
+        status: Optional[ActivityVisibilityEnum] = Query(
+            None, description="Filter by visibility status"
+        ),
+        offset: int = Query(0, ge=0, description="Offset"),
+        limit: int = Query(10, gt=0, le=100, description="Limit"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     events, total_count = await Event.get_admin_list(
         session,
         search,
+        status,
         offset,
         limit,
     )
@@ -78,9 +83,9 @@ async def get_admin_events(
     },
 )
 async def create_event(
-    payload: schemas.EventCreate,
-    session: AsyncSession = Depends(db_helper.session_getter),
-    current_user: UserORM = Depends(get_basic_user),
+        payload: schemas.EventCreate,
+        session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(get_basic_user),
 ) -> Response:
     event = await Event.create(session, payload.model_dump())
     return event
@@ -99,10 +104,10 @@ async def create_event(
     },
 )
 async def update_event_by_id(
-    payload: schemas.EventUpdate,
-    event_id: PositiveInt = Path(..., description="The identifier of event"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.EventUpdate,
+        event_id: PositiveInt = Path(..., description="The identifier of event"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     event = await Event.update(session, event_id, payload.model_dump())
     return event
@@ -119,9 +124,9 @@ async def update_event_by_id(
     },
 )
 async def delete_event_by_id(
-    event_id: PositiveInt = Path(..., description="The identifier of event"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        event_id: PositiveInt = Path(..., description="The identifier of event"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     await Event.delete(session, event_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -140,10 +145,10 @@ async def delete_event_by_id(
     },
 )
 async def upload_logo_by_event_id(
-    event_id: PositiveInt = Path(..., description="The identifier of event"),
-    file: UploadFile = Depends(get_image_with),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        event_id: PositiveInt = Path(..., description="The identifier of event"),
+        file: UploadFile = Depends(get_image_with),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     image_url = save_image(file)
     event = await Event.update_image_url(session, event_id, image_url)
@@ -163,9 +168,9 @@ async def upload_logo_by_event_id(
     },
 )
 async def create_exhibition(
-    payload: schemas.ExhibitionCreate,
-    session: AsyncSession = Depends(db_helper.session_getter),
-    current_user: UserORM = Depends(get_basic_user),
+        payload: schemas.ExhibitionCreate,
+        session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(get_basic_user),
 ) -> Response:
     exhibition = await Exhibition.create(session, payload.model_dump())
     return schemas.ExhibitionBase.model_validate(exhibition)
@@ -183,15 +188,17 @@ async def create_exhibition(
     },
 )
 async def get_admin_exhibitions(
-    search: Optional[str] = Query(None, description="Search string"),
-    offset: int = Query(0, ge=0, description="Offset"),
-    limit: int = Query(10, gt=0, le=100, description="Limit"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        search: Optional[str] = Query(None, description="Search string"),
+        status: Optional[ActivityVisibilityEnum] = Query(None, description="Filter by status"),
+        offset: int = Query(0, ge=0, description="Offset"),
+        limit: int = Query(10, gt=0, le=100, description="Limit"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     exhibitions, total_count = await Exhibition.get_admin_list(
         session,
         search,
+        status,
         offset,
         limit,
     )
@@ -211,10 +218,10 @@ async def get_admin_exhibitions(
     },
 )
 async def update_exhibition_by_id(
-    pyload: schemas.ExhibitionUpdate,
-    exhibition_id: PositiveInt = Path(..., description="The identifier of exhibition"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        pyload: schemas.ExhibitionUpdate,
+        exhibition_id: PositiveInt = Path(..., description="The identifier of exhibition"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     exhibition = await Exhibition.update(session, exhibition_id, pyload.model_dump())
     return exhibition
@@ -231,9 +238,9 @@ async def update_exhibition_by_id(
     },
 )
 async def delete_exhibition_by_id(
-    exhibition_id: PositiveInt = Path(..., description="The identifier of event"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        exhibition_id: PositiveInt = Path(..., description="The identifier of event"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     await Exhibition.delete(session, exhibition_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -252,10 +259,10 @@ async def delete_exhibition_by_id(
     },
 )
 async def upload_logo_by_exhibition_id(
-    exhibition_id: PositiveInt = Path(..., description="The identifier of exhibition"),
-    file: UploadFile = Depends(get_image_with),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        exhibition_id: PositiveInt = Path(..., description="The identifier of exhibition"),
+        file: UploadFile = Depends(get_image_with),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     image_url = save_image(file)
     exhibition = await Exhibition.update_image_url(session, exhibition_id, image_url)
@@ -275,9 +282,9 @@ async def upload_logo_by_exhibition_id(
     },
 )
 async def create_location(
-    payload: schemas.LocationCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.LocationCreate,
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     location = await Location.create(session, payload.model_dump())
     return location
@@ -291,10 +298,10 @@ async def create_location(
     responses=response_codes,
 )
 async def create_navigation_floor(
-    payload: schemas.NavigationFloorCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.NavigationFloorCreate,
+        current_user: UserORM = Depends(get_basic_user),
+        location_id: PositiveInt = Path(..., description="The identifier of location"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     await Location.get_by_id(session, location_id)
     existing_floor = await NavigationFloor.get_by_location_id_and_num(
@@ -322,11 +329,11 @@ async def create_navigation_floor(
     responses=response_codes,
 )
 async def update_navigation_floor_plan(
-    payload: schemas.NavigationFloorUpdate,
-    navigation_floor_id: PositiveInt = Path(
-        ..., description="The identifier of navigation floor"
-    ),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.NavigationFloorUpdate,
+        navigation_floor_id: PositiveInt = Path(
+            ..., description="The identifier of navigation floor"
+        ),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     navigation_floor = await NavigationFloor.get_by_id(session, navigation_floor_id)
 
@@ -352,11 +359,11 @@ async def update_navigation_floor_plan(
     tags=["navigation"],
 )
 async def delete_navigation_floor(
-    navigation_floor_id: PositiveInt = Path(
-        ..., description="The identifier of navigation floor"
-    ),
-    session: AsyncSession = Depends(db_helper.session_getter),
-    current_user: UserORM = Depends(get_basic_user),
+        navigation_floor_id: PositiveInt = Path(
+            ..., description="The identifier of navigation floor"
+        ),
+        session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(get_basic_user),
 ):
     await NavigationFloor.delete(session, navigation_floor_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -370,11 +377,11 @@ async def delete_navigation_floor(
     responses=response_codes,
 )
 async def upload_navigation_floor_plan(
-    file: UploadFile = Depends(get_image_with),
-    navigation_floor_id: PositiveInt = Path(
-        ..., description="The identifier of navigation floor"
-    ),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        file: UploadFile = Depends(get_image_with),
+        navigation_floor_id: PositiveInt = Path(
+            ..., description="The identifier of navigation floor"
+        ),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     image_url = save_image(file)
     navigation_floor = await NavigationFloor.update(
@@ -390,12 +397,12 @@ async def upload_navigation_floor_plan(
     status_code=201,
 )
 async def create_navigation_point(
-    payload: schemas.NavigationPointCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    navigation_floor_id: PositiveInt = Path(
-        ..., description="The identifier of navigation floor"
-    ),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.NavigationPointCreate,
+        current_user: UserORM = Depends(get_basic_user),
+        navigation_floor_id: PositiveInt = Path(
+            ..., description="The identifier of navigation floor"
+        ),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     await NavigationFloor.get_by_id(session, navigation_floor_id)
     point_data = {
@@ -416,10 +423,10 @@ async def create_navigation_point(
     status_code=200,
 )
 async def update_navigation_point(
-    payload: schemas.NavigationPointUpdate,
-    current_user: UserORM = Depends(get_basic_user),
-    navigation_point_id: PositiveInt = Path(..., description="The identifier of navigation point"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.NavigationPointUpdate,
+        current_user: UserORM = Depends(get_basic_user),
+        navigation_point_id: PositiveInt = Path(..., description="The identifier of navigation point"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     navigation_point = await NavigationPoint.update(
         session, navigation_point_id, payload.model_dump(exclude_unset=True)
@@ -433,12 +440,13 @@ async def update_navigation_point(
     status_code=204,
 )
 async def delete_navigation_point(
-    current_user: UserORM = Depends(get_basic_user),
-    navigation_point_id: PositiveInt = Path(..., description="The identifier of navigation point"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(get_basic_user),
+        navigation_point_id: PositiveInt = Path(..., description="The identifier of navigation point"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     await NavigationPoint.delete(session, navigation_point_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 @site_router.post(
     "/location/{location_id}/inclusive-story",
@@ -448,10 +456,10 @@ async def delete_navigation_point(
     responses=response_codes,
 )
 async def create_inclusive_story(
-    payload: schemas.InclusiveStoryCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.InclusiveStoryCreate,
+        current_user: UserORM = Depends(get_basic_user),
+        location_id: PositiveInt = Path(..., description="The identifier of location"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     await Location.get_by_id(session, location_id)
 
@@ -471,11 +479,10 @@ async def create_inclusive_story(
     responses=response_codes,
 )
 async def update_inclusive_story(
-    payload: schemas.InclusiveStoryUpdate,
-    inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.InclusiveStoryUpdate,
+        inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
-
     inclusive_story = await InclusiveStory.update(
         session, inclusive_story_id, payload.model_dump(exclude_unset=True)
     )
@@ -488,9 +495,9 @@ async def update_inclusive_story(
     tags=["inclusive"],
 )
 async def delete_inclusive_story(
-    inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
-    session: AsyncSession = Depends(db_helper.session_getter),
-    current_user: UserORM = Depends(get_basic_user),
+        inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
+        session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(get_basic_user),
 ):
     await InclusiveStory.delete(session, inclusive_story_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -503,10 +510,10 @@ async def delete_inclusive_story(
     status_code=201,
 )
 async def create_story(
-    payload: schemas.StoryCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.StoryCreate,
+        current_user: UserORM = Depends(get_basic_user),
+        inclusive_story_id: PositiveInt = Path(..., description="The identifier of inclusive story"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     await InclusiveStory.get_by_id(session, inclusive_story_id)
     story_data = {
@@ -517,6 +524,7 @@ async def create_story(
     story = await Story.create(session, story_data)
     return story
 
+
 @site_router.post(
     "/story/{story_id}",
     response_model=schemas.StoryBase,
@@ -525,15 +533,16 @@ async def create_story(
     responses=response_codes,
 )
 async def upload_story_image(
-    file: UploadFile = Depends(get_image_with),
-    story_id: PositiveInt = Path(..., description="The identifier of story"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        file: UploadFile = Depends(get_image_with),
+        story_id: PositiveInt = Path(..., description="The identifier of story"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     image_url = save_image(file)
     story = await Story.update(
         session, story_id, {"story_image_url": image_url}
     )
     return story
+
 
 @site_router.patch(
     "/story/{story_id}",
@@ -542,10 +551,10 @@ async def upload_story_image(
     status_code=200,
 )
 async def update_story(
-    payload: schemas.StoryUpdate,
-    current_user: UserORM = Depends(get_basic_user),
-    story_id: PositiveInt = Path(..., description="The identifier of story"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.StoryUpdate,
+        current_user: UserORM = Depends(get_basic_user),
+        story_id: PositiveInt = Path(..., description="The identifier of story"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     story = await Story.update(
         session, story_id, payload.model_dump(exclude_unset=True)
@@ -559,9 +568,9 @@ async def update_story(
     status_code=204,
 )
 async def delete_story(
-    current_user: UserORM = Depends(get_basic_user),
-    story_id: PositiveInt = Path(..., description="The identifier of story"),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        current_user: UserORM = Depends(get_basic_user),
+        story_id: PositiveInt = Path(..., description="The identifier of story"),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ):
     await Story.delete(session, story_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -580,9 +589,9 @@ async def delete_story(
     },
 )
 async def create_accessibility(
-    payload: schemas.AccessibilityCreate,
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.AccessibilityCreate,
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     accessibility = await Accessibility.create(session, payload.model_dump())
     return accessibility
@@ -600,11 +609,11 @@ async def create_accessibility(
     },
 )
 async def get_accessibility_by_id(
-    accessibility_id: PositiveInt = Path(
-        ..., description="The identifier of accessibility"
-    ),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        accessibility_id: PositiveInt = Path(
+            ..., description="The identifier of accessibility"
+        ),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     accessibility = await Accessibility.get_by_id(session, accessibility_id)
     return accessibility
@@ -621,11 +630,11 @@ async def get_accessibility_by_id(
     },
 )
 async def delete_accessibility_by_id(
-    accessibility_id: PositiveInt = Path(
-        ..., description="The identifier of accessibility"
-    ),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        accessibility_id: PositiveInt = Path(
+            ..., description="The identifier of accessibility"
+        ),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     await Accessibility.delete(session, accessibility_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -644,12 +653,12 @@ async def delete_accessibility_by_id(
     },
 )
 async def upload_logo_by_accessibility_id(
-    accessibility_id: PositiveInt = Path(
-        ..., description="The identifier of accessibility"
-    ),
-    file: UploadFile = Depends(get_image_with),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        accessibility_id: PositiveInt = Path(
+            ..., description="The identifier of accessibility"
+        ),
+        file: UploadFile = Depends(get_image_with),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     image_url = save_image(file)
     accessibility = await Accessibility.update(
@@ -671,10 +680,10 @@ async def upload_logo_by_accessibility_id(
     },
 )
 async def update_location_by_id(
-    pyload: schemas.LocationUpdate,
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        pyload: schemas.LocationUpdate,
+        location_id: PositiveInt = Path(..., description="The identifier of location"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     location = await Location.update(
         session, location_id, pyload.model_dump(exclude_unset=True)
@@ -693,9 +702,9 @@ async def update_location_by_id(
     },
 )
 async def delete_location_by_id(
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        location_id: PositiveInt = Path(..., description="The identifier of location"),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     await Location.delete(session, location_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -714,10 +723,10 @@ async def delete_location_by_id(
     },
 )
 async def upload_image_by_location_id(
-    location_id: PositiveInt = Path(..., description="The identifier of location"),
-    file: UploadFile = Depends(get_image_with),
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        location_id: PositiveInt = Path(..., description="The identifier of location"),
+        file: UploadFile = Depends(get_image_with),
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     image_url = save_image(file)
     location = await Location.update(session, location_id, {"image_url": image_url})
@@ -737,9 +746,9 @@ async def upload_image_by_location_id(
     },
 )
 async def update_about(
-    payload: schemas.AboutUpdate,
-    current_user: UserORM = Depends(get_basic_user),
-    session: AsyncSession = Depends(db_helper.session_getter),
+        payload: schemas.AboutUpdate,
+        current_user: UserORM = Depends(get_basic_user),
+        session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
     about = await About.update_one(session, payload.model_dump(exclude_unset=True))
     return about

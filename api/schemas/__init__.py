@@ -62,6 +62,8 @@ from .inclusive_story import (
     InclusiveStoryUpdate
 )
 
+from .health import HealthStatus, HealthStatusEnum
+
 __all__ = (
     "EventBase",
     "EventCreate",
@@ -110,4 +112,6 @@ __all__ = (
     "InclusiveStoryBase",
     "InclusiveStoryCreate",
     "InclusiveStoryUpdate"
+    "HealthStatus",
+    "HealthStatusEnum"
 )
