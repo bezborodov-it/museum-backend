@@ -12,7 +12,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from api.models.enum import AgeEnum
+from api.models.enum import AgeEnum, ActivityVisibilityEnum
 from api.models.mixin.date import DateORMMixin
 from api.models.orms.base import BaseORM
 from api.models.associations import (
@@ -39,10 +39,12 @@ class EventORM(BaseORM, DateORMMixin):
     age = Column(Enum(AgeEnum), nullable=False, default=AgeEnum.ZERO_PLUS)
     duration = Column(Integer, nullable=True)
     require_registration = Column(Boolean, nullable=False, default=False)
-    location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
+    location_id = Column(BigInteger, ForeignKey("location.id"), nullable=True)
     genre_id = Column(BigInteger, ForeignKey("genre.id"), nullable=False)
 
     category_id = Column(BigInteger, ForeignKey("category.id"), nullable=True)
+
+    status = Column(Enum(ActivityVisibilityEnum),nullable=False, default=ActivityVisibilityEnum.ACTIVE, server_default=ActivityVisibilityEnum.ACTIVE.name,)
 
     genre = relationship(
         "GenreORM",
@@ -90,8 +92,9 @@ class ExhibitionORM(BaseORM, DateORMMixin):
     audio_guide = Column(Boolean, nullable=False)
     pinned_order = Column(SmallInteger, nullable=True, default=None)
     age = Column(Enum(AgeEnum), nullable=False, default=AgeEnum.ZERO_PLUS.value)
+    status = Column(Enum(ActivityVisibilityEnum),nullable=False, default=ActivityVisibilityEnum.ACTIVE, server_default=ActivityVisibilityEnum.ACTIVE.name,)
 
-    location_id = Column(BigInteger, ForeignKey("location.id"), nullable=False)
+    location_id = Column(BigInteger, ForeignKey("location.id"), nullable=True)
     category_id = Column(BigInteger, ForeignKey("category.id"), nullable=True)
 
     location = relationship(
