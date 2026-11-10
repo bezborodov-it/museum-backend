@@ -109,7 +109,7 @@ async def update_event_by_id(
         current_user: UserORM = Depends(get_basic_user),
         session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    event = await Event.update(session, event_id, payload.model_dump())
+    event = await Event.update(session, event_id, payload.model_dump(exclude_unset=True))
     return event
 
 
@@ -223,7 +223,7 @@ async def update_exhibition_by_id(
         current_user: UserORM = Depends(get_basic_user),
         session: AsyncSession = Depends(db_helper.session_getter),
 ) -> Response:
-    exhibition = await Exhibition.update(session, exhibition_id, pyload.model_dump())
+    exhibition = await Exhibition.update(session, exhibition_id, pyload.model_dump(exclude_unset=True))
     return exhibition
 
 
